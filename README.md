@@ -1,0 +1,4 @@
+use-plugin
+==========
+
+Use plugin
