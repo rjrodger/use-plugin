@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha test/*.test.js",
     "jshint": "./node_modules/.bin/jshint use.js",
-    "docco": "./node_modules/.bin/docco use.js -o doc"
+    "docco": "./node_modules/.bin/docco use.js -o doc",
+    "gh-pages-doc": "cp -r doc/* ../gh-pages/use-plugin/doc"
   },
   "repository": {
     "type": "git",

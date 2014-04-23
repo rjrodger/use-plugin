@@ -3,10 +3,14 @@
 "use strict";
 
 
+
+// System modules
 var path = require('path')
 var util = require('util')
 
 
+
+// External modules
 var _     = require('underscore')
 var nid   = require('nid')
 var norma = require('norma')
@@ -21,14 +25,17 @@ function make( options ) {
   },options)
 
 
-  function use( arg0, arg1, arg2 ) {
+  // This is the function that loads plugins.
+  function use() {
+    var args        = Array.prototype.slice.call(arguments)
+
     var parent      = module.parent
     var grandparent = parent.parent
 
-    var plugindesc = build_plugindesc( grandparent, arg0, arg1, arg2 )
-    resolve_plugin( plugindesc, parent, options )
+    args.unshift(grandparent)
 
-    //console.dir(plugindesc)
+    var plugindesc = build_plugindesc.apply( this, args )
+    resolve_plugin( plugindesc, parent, options )
 
     return plugindesc
   }
