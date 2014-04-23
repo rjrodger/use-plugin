@@ -1,0 +1,37 @@
+{
+  "name": "use-plugin",
+  "version": "0.1.0",
+  "description": "Plugin loader",
+  "main": "use.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha test/*.test.js",
+    "jshint": "./node_modules/.bin/jshint use.js",
+    "docco": "./node_modules/.bin/docco use.js -o doc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rjrodger/use-plugin.git"
+  },
+  "keywords": [
+    "use",
+    "plugin"
+  ],
+  "author": "Richard Rodger (http://richardrodger.com)",
+  "license": "MIT",
+  "dependencies": {
+    "underscore": "~1.6.0",
+    "nid": "~0.3.2",
+    "norma": "~0.2.3"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "mocha": "~1.18.2",
+    "docco": "~0.6.3",
+    "jshint": "~2.5.0"
+  },
+  "files": [
+    "README.md",
+    "LICENSE.txt",
+    "use.js"
+  ]
+}
