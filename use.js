@@ -53,6 +53,12 @@ function error( code, details ) {
 
 
 
+// Create description object for the plugin using the supplied arguments.
+// Plugin can be one of:
+//
+//   * _string_: require as a module over an extended range of paths
+//   * _function_: provide the initialization function directly
+//   * _object_: provide a custom plugin description
 function build_plugindesc() {
   var spec = norma("{parent:o, plugin:o|f|s, options:o|s|n|b?, callback:f? ",arguments)
 

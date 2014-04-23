@@ -39,8 +39,9 @@
 <span class="hljs-keyword">var</span> util = <span class="hljs-built_in">require</span>(<span class="hljs-string">'util'</span>)
 
 
-<span class="hljs-keyword">var</span> _   = <span class="hljs-built_in">require</span>(<span class="hljs-string">'underscore'</span>)
-<span class="hljs-keyword">var</span> nid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nid'</span>)</pre></div></div>
+<span class="hljs-keyword">var</span> _     = <span class="hljs-built_in">require</span>(<span class="hljs-string">'underscore'</span>)
+<span class="hljs-keyword">var</span> nid   = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nid'</span>)
+<span class="hljs-keyword">var</span> norma = <span class="hljs-built_in">require</span>(<span class="hljs-string">'norma'</span>)</pre></div></div>
             
         </li>
         
@@ -57,20 +58,17 @@
             
             <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make</span><span class="hljs-params">( options )</span> {</span>
 
+  options = _.extend({
+    prefix:<span class="hljs-string">'plugin-'</span>
+  },options)
+
+
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">use</span><span class="hljs-params">( arg0, arg1, arg2 )</span> {</span>
     <span class="hljs-keyword">var</span> parent      = module.parent
     <span class="hljs-keyword">var</span> grandparent = parent.parent
 
     <span class="hljs-keyword">var</span> plugindesc = build_plugindesc( grandparent, arg0, arg1, arg2 )
-    resolve_plugin( plugindesc, parent, options )
-
-    console.dir(plugindesc)
-
-    <span class="hljs-keyword">return</span> plugindesc
-  }
-  
-  <span class="hljs-keyword">return</span> use;
-}</pre></div></div>
+    resolve_plugin( plugindesc, parent, options )</pre></div></div>
             
         </li>
         
@@ -81,50 +79,16 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Create Error object with additional properties.</p>
-<ul>
-<li><strong>code</strong>:    error code string</li>
-<li><strong>details</strong>: context object</li>
-</ul>
+              <p>console.dir(plugindesc)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">error</span><span class="hljs-params">(code,details)</span> {</span>
-  <span class="hljs-keyword">var</span> e = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(code)
-  e.code = code
-  e.details = details
-  <span class="hljs-keyword">return</span> e;
-}
-
-
-
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build_plugindesc</span><span class="hljs-params">( parentmodule, arg0, arg1, arg2 )</span> {</span>
-  <span class="hljs-keyword">var</span> plugin = arg0 ? (arg0.senecaplugin || arg0) : <span class="hljs-literal">null</span>
-
-  <span class="hljs-keyword">var</span> plugin_opts = (_.isObject(arg1) || _.isString(arg1) || _.isNumber(arg1) || _.isBoolean(arg1) ) &amp;&amp; 
-        !_.isFunction(arg1) ? arg1 : {}
-  <span class="hljs-keyword">var</span> cb = _.isFunction(arg2) ? arg2 : (_.isFunction(arg1) ? arg1 : <span class="hljs-literal">null</span>) 
-
-  plugin_opts = _.isString(arg1) || _.isNumber(arg1) || _.isBoolean(arg1) ? {value$:plugin_opts} : plugin_opts
-
-  <span class="hljs-keyword">var</span> plugindesc = {opts:plugin_opts,callback:cb}
-
-  <span class="hljs-keyword">if</span>( _.isString(plugin) ) {
-    plugindesc.name = plugin
+            <div class="content"><div class='highlight'><pre>
+    <span class="hljs-keyword">return</span> plugindesc
   }
-  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>( _.isFunction( plugin ) ) {
-    plugindesc.name = plugin.name || plugin.seneca_name || <span class="hljs-string">'anon-'</span>+nid()
-    plugindesc.init = plugin
-  }
-  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>( _.isObject( plugin ) ) {
-    plugindesc = plugin
-  }
+
   
-  plugindesc.opts = _.extend(plugindesc.opts||{},plugin_opts||{})
-
-  plugindesc.parentmodule = parentmodule
-
-  <span class="hljs-keyword">return</span> plugindesc
+  <span class="hljs-keyword">return</span> use;
 }</pre></div></div>
             
         </li>
@@ -136,6 +100,84 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
+              <p>Create Error object with additional properties.</p>
+<ul>
+<li><strong>code</strong>:    error code string</li>
+<li><strong>details</strong>: context object</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">error</span><span class="hljs-params">( code, details )</span> {</span>
+  <span class="hljs-keyword">var</span> e = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(code)
+  e.package = <span class="hljs-string">'use'</span>
+  e.code    = code
+  e.details = details || {}
+  <span class="hljs-keyword">return</span> e;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Create description object for the plugin using the supplied arguments.
+Plugin can be one of:</p>
+<ul>
+<li><em>string</em>: require as a module over an extended range of paths</li>
+<li><em>function</em>: provide the initialization function directly</li>
+<li><em>object</em>: provide a custom plugin description</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build_plugindesc</span><span class="hljs-params">()</span> {</span>
+  <span class="hljs-keyword">var</span> spec = norma(<span class="hljs-string">"{parent:o, plugin:o|f|s, options:o|s|n|b?, callback:f? "</span>,<span class="hljs-built_in">arguments</span>)
+
+
+  <span class="hljs-keyword">var</span> plugin = spec.plugin
+
+  <span class="hljs-keyword">var</span> options = <span class="hljs-literal">null</span> == spec.options ? {} : spec.options
+  options = _.isObject(options) ? options : {value$:options}
+
+
+  <span class="hljs-keyword">var</span> plugindesc = {
+    opts:     options,
+    callback: spec.callback,
+    parent:   spec.parent
+  }
+
+
+  <span class="hljs-keyword">if</span>( _.isString( plugin ) ) {
+    plugindesc.name = plugin
+  }
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>( _.isFunction( plugin ) ) {
+    plugindesc.name = plugin.name || options.prefix+nid()
+    plugindesc.init = plugin
+  }
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>( _.isObject( plugin ) ) {
+    plugindesc = _.extend({},plugin,plugindesc)
+  }
+  
+  plugindesc.opts = _.extend(plugindesc.opts||{},options||{})
+
+
+  <span class="hljs-keyword">return</span> plugindesc
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
               <p>finds the plugin module using require
 the module must be a function
 sets plugindesc.init to be the function exposed by the module</p>
@@ -143,7 +185,7 @@ sets plugindesc.init to be the function exposed by the module</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">resolve_plugin</span><span class="hljs-params">( plugindesc, parent, options )</span> {</span>
-  <span class="hljs-keyword">var</span> use_require = plugindesc.parentmodule.require || parent.require
+  <span class="hljs-keyword">var</span> use_require = plugindesc.parent.require || parent.require
 
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">try_require</span><span class="hljs-params">(name)</span> {</span>
@@ -194,11 +236,11 @@ sets plugindesc.init to be the function exposed by the module</p>
         </li>
         
         
-        <li id="section-5">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>try to load as a built-in module</p>
 
@@ -210,11 +252,11 @@ sets plugindesc.init to be the function exposed by the module</p>
         </li>
         
         
-        <li id="section-6">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>yes, control flow. I will burn in Hell.</p>
 
@@ -244,9 +286,9 @@ sets plugindesc.init to be the function exposed by the module</p>
 
         plugin_names.push( <span class="hljs-string">'./'</span>+name )
 
-        <span class="hljs-keyword">var</span> parent_filename = (plugindesc.parentmodule||{}).filename
+        <span class="hljs-keyword">var</span> parent_filename = (plugindesc.parent||{}).filename
         <span class="hljs-keyword">var</span> paths = parent_filename ? [ path.dirname(parent_filename) ] : [] 
-        paths = _.compact(paths.concat((plugindesc.parentmodule||{}).paths||[]))
+        paths = _.compact(paths.concat((plugindesc.parent||{}).paths||[]))
 
         <span class="hljs-keyword">var</span> plugin_paths = plugin_names.slice()
         paths.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(path)</span>{</span>
@@ -284,11 +326,11 @@ sets plugindesc.init to be the function exposed by the module</p>
         </li>
         
         
-        <li id="section-7">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Export the make function.</p>
 
