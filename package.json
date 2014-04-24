@@ -22,9 +22,9 @@
   "dependencies": {
     "underscore": "~1.6.0",
     "nid": "~0.3.2",
-    "norma": "~0.2.4"
+    "norma": "~0.2.6",
+    "eraro": "~0.1.2"
   },
-  "peerDependencies": {},
   "devDependencies": {
     "mocha": "~1.18.2",
     "docco": "~0.6.3",

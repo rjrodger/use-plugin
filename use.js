@@ -4,20 +4,21 @@
 
 
 
-// System modules
+// #### System modules
 var path = require('path')
 var util = require('util')
 
 
 
-// External modules
+// #### External modules
 var _     = require('underscore')
 var nid   = require('nid')
 var norma = require('norma')
+var error = require('eraro')({package:'use-plugin'})
 
 
 
-// Create a new _use_ function.
+// #### Create a new _use_ function
 function make( options ) {
 
   options = _.extend({
@@ -31,10 +32,11 @@ function make( options ) {
 
     var parent      = module.parent
     var grandparent = parent.parent
-
+    
     args.unshift(grandparent)
+    args.unshift(options)
 
-    var plugindesc = build_plugindesc.apply( this, args )
+    var plugindesc = build_plugindesc.apply( null, args )
     resolve_plugin( plugindesc, parent, options )
 
     return plugindesc
@@ -46,40 +48,26 @@ function make( options ) {
 
 
 
-// Create Error object with additional properties.
-//
-//   * __code__:    error code string
-//   * __details__: context object
-function error( code, details ) {
-  var e = new Error(code)
-  e.package = 'use'
-  e.code    = code
-  e.details = details || {}
-  return e;
-}
-
-
-
-// Create description object for the plugin using the supplied arguments.
+// #### Create description object for the plugin using the supplied arguments
 // Plugin can be one of:
 //
 //   * _string_: require as a module over an extended range of paths
 //   * _function_: provide the initialization function directly
 //   * _object_: provide a custom plugin description
-function build_plugindesc() {
-  var spec = norma("{parent:o, plugin:o|f|s, options:o|s|n|b?, callback:f? ",arguments)
-
+function build_plugindesc( baseoptions, parent ) {
+  var spec = norma("{plugin:o|f|s, options:o|s|n|b?, callback:f? ",Array.prototype.slice.call(arguments,2))
 
   var plugin = spec.plugin
 
   var options = null == spec.options ? {} : spec.options
   options = _.isObject(options) ? options : {value$:options}
+  options = _.extend({},baseoptions,options)
 
 
   var plugindesc = {
-    opts:     options,
+    options:  options,
     callback: spec.callback,
-    parent:   spec.parent
+    parent:   parent
   }
 
 
@@ -87,14 +75,23 @@ function build_plugindesc() {
     plugindesc.name = plugin
   }
   else if( _.isFunction( plugin ) ) {
-    plugindesc.name = plugin.name || options.prefix+nid()
+    if( _.isString(plugin.name) && '' !== plugin.name ) {
+      plugindesc.name = plugin.name
+    }
+    else {
+      var prefix = _.isArray(options.prefix) ? options.prefix[0] : options.prefix
+      plugindesc.name = prefix+nid()
+    }
+
     plugindesc.init = plugin
   }
   else if( _.isObject( plugin ) ) {
     plugindesc = _.extend({},plugin,plugindesc)
+    if( !_.isString(plugindesc.name) ) throw error('no_name',plugin);
+    if( !_.isFunction(plugindesc.init) ) throw error('no_init_function',plugin);
   }
   
-  plugindesc.opts = _.extend(plugindesc.opts||{},options||{})
+  plugindesc.options = _.extend(plugindesc.options||{},options||{})
 
 
   return plugindesc
@@ -102,9 +99,9 @@ function build_plugindesc() {
 
 
 
-// finds the plugin module using require
-// the module must be a function
-// sets plugindesc.init to be the function exposed by the module
+// #### Finds the plugin module using require
+// The module must be a function.
+// Sets plugindesc.init to be the function exposed by the module.
 function resolve_plugin( plugindesc, parent, options ) {
   var use_require = plugindesc.parent.require || parent.require
 
@@ -140,18 +137,20 @@ function resolve_plugin( plugindesc, parent, options ) {
   }
 
 
-  var m = /^(.+)|(.+)$/.exec(plugindesc.name)
+  // Plugins can be tagged.
+  // The tag can be embedded inside the name using a $ separator: _name$tag_.
+  // Note: the $tag suffix is NOT considered part of the file name!
+  var m = /^(.+)\$(.+)$/.exec(plugindesc.name)
   if( m ) {
     plugindesc.name = m[1]
     plugindesc.tag  = m[2]
   }
 
-
   if( !plugindesc.init) {
     plugindesc.searched_paths = []
     var name = plugindesc.name
     var tag  = plugindesc.tag
-    var fullname = name+(tag?'/'+tag:'')
+    var fullname = name+(tag?'$'+tag:'')
     var initfunc
 
     // try to load as a built-in module
@@ -208,7 +207,7 @@ function resolve_plugin( plugindesc, parent, options ) {
 
     if( initfunc ) {
       if( !_.isFunction(initfunc) ) {
-        throw new Error('Plugin has no init function; '+util.inspect(plugindesc))
+        throw error('no_init_function',plugindesc)
       }
 
       plugindesc.init = initfunc
@@ -220,5 +219,6 @@ function resolve_plugin( plugindesc, parent, options ) {
 }
 
 
-// Export the make function.
+// #### Export the make function
 module.exports = make
+
