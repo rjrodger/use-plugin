@@ -90,12 +90,15 @@ describe('use', function() {
     var use = makeuse()
 
     try { use({}); assert.fail(); } catch( e ) { assert.equal('no_name',e.code) } 
-    try { use({name:'a'}); assert.fail(); } catch( e ) { assert.equal('no_init_function',e.code) } 
+    try { use({name:'not-a-plugin'}); assert.fail(); } catch( e ) { assert.equal('not_found',e.code) } 
     try { use({name:'a',init:1}); assert.fail(); } catch( e ) { assert.equal('no_init_function',e.code) } 
 
     var a = use({name:'a',init:function(){return 'ar'}})
     assert.equal('a',a.name)    
     assert.equal('ar',a.init())    
+
+    var p0 = use({name:'p0'})
+    assert.equal('p0',p0.name)
   })
 
 

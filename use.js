@@ -88,7 +88,7 @@ function build_plugindesc( baseoptions, parent ) {
   else if( _.isObject( plugin ) ) {
     plugindesc = _.extend({},plugin,plugindesc)
     if( !_.isString(plugindesc.name) ) throw error('no_name',plugin);
-    if( !_.isFunction(plugindesc.init) ) throw error('no_init_function',plugin);
+    if( null != plugindesc.init && !_.isFunction(plugindesc.init) ) throw error('no_init_function',plugin);
   }
   
   plugindesc.options = _.extend(plugindesc.options||{},options||{})
