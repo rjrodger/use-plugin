@@ -18,30 +18,47 @@ var error = require('eraro')({package:'use-plugin'})
 
 
 
+// #### Exports
+module.exports = make
+
+
+
+
 // #### Create a new _use_ function
 function make( options ) {
 
+  //console.dir(options.module)
+
   options = _.extend({
-    prefix:'plugin-'
+    prefix:  'plugin-',
+    builtin: '../plugin/',
+    module:  module.parent
   },options)
+
+
+  //console.log(util.inspect(module,{depth:null}))
 
 
   // This is the function that loads plugins.
   function use() {
-    var args        = Array.prototype.slice.call(arguments)
+    var args = norma("{plugin:o|f|s, options:o|s|n|b?, callback:f?}",arguments)
 
-    var parent      = module.parent
-    var grandparent = parent.parent
-    
-    args.unshift(grandparent)
-    args.unshift(options)
+    var plugindesc = build_plugindesc(args)
+    plugindesc.search = build_plugin_names( plugindesc.name, options.builtin, options.prefix )
 
-    var plugindesc = build_plugindesc.apply( null, args )
-    resolve_plugin( plugindesc, parent, options )
+    console.dir(plugindesc)
+
+
+    if( !_.isFunction( plugindesc.init ) ) {
+      loadplugin( plugindesc, options.module )      
+    }
+
+    if( !_.isFunction( plugindesc.init ) ) {
+      throw error('not_found',plugindesc)
+    }
 
     return plugindesc
   }
-
   
   return use;
 }
@@ -51,23 +68,19 @@ function make( options ) {
 // #### Create description object for the plugin using the supplied arguments
 // Plugin can be one of:
 //
-//   * _string_: require as a module over an extended range of paths
+//   * _string_: require as a module over an extended range of _require_ calls
 //   * _function_: provide the initialization function directly
 //   * _object_: provide a custom plugin description
-function build_plugindesc( baseoptions, parent ) {
-  var spec = norma("{plugin:o|f|s, options:o|s|n|b?, callback:f? ",Array.prototype.slice.call(arguments,2))
-
+function build_plugindesc( spec ) {
   var plugin = spec.plugin
 
   var options = null == spec.options ? {} : spec.options
   options = _.isObject(options) ? options : {value$:options}
-  options = _.extend({},baseoptions,options)
 
 
   var plugindesc = {
     options:  options,
-    callback: spec.callback,
-    parent:   parent
+    callback: spec.callback
   }
 
 
@@ -94,49 +107,6 @@ function build_plugindesc( baseoptions, parent ) {
   plugindesc.options = _.extend(plugindesc.options||{},options||{})
 
 
-  return plugindesc
-}
-
-
-
-// #### Finds the plugin module using require
-// The module must be a function.
-// Sets plugindesc.init to be the function exposed by the module.
-function resolve_plugin( plugindesc, parent, options ) {
-  var use_require = plugindesc.parent.require || parent.require
-
-
-  function try_require(name) {
-    var first_err = null
-    var found
-
-    if( !name ) return found;
-
-    try {
-      plugindesc.searched_paths.push(name)
-      found = use_require(name)
-      return found
-    }
-    catch(e) {
-      first_err = first_err || e
-
-      try {
-        found = parent.require(name)
-      }
-      catch(ee) {
-        first_err = first_err || ee
-      }
-
-      return found;
-    }
-  }
-
-
-  if( !plugindesc.name ) {
-    throw error('no_name',plugindesc)
-  }
-
-
   // Plugins can be tagged.
   // The tag can be embedded inside the name using a $ separator: _name$tag_.
   // Note: the $tag suffix is NOT considered part of the file name!
@@ -146,79 +116,123 @@ function resolve_plugin( plugindesc, parent, options ) {
     plugindesc.tag  = m[2]
   }
 
-  if( !plugindesc.init) {
-    plugindesc.searched_paths = []
-    var name = plugindesc.name
-    var tag  = plugindesc.tag
-    var fullname = name+(tag?'$'+tag:'')
-    var initfunc
 
-    // try to load as a built-in module
-    try {
-      if( ~name.indexOf('..') || ~name.indexOf('/') ) {
-        // yes, control flow. I will burn in Hell.
-        throw new Error("not a built-in: '"+name+"', [SKIP]")
-      }
+  if( !plugindesc.name ) {
+    throw error('no_name',plugindesc)
+  }
 
-      var builtin_path = '../plugin/'+name
-      plugindesc.searched_paths.push(builtin_path)
-      initfunc = parent.require(builtin_path)
-    }
-
-    catch(e) {
-      if( e.message && ( -1 != e.message.indexOf("'"+builtin_path+"'") || ~e.message.indexOf('[SKIP]')) ) {
-
-        var plugin_names = [name]
-
-        if( _.isString( options.prefix ) ) {
-          plugin_names.push( options.prefix+name )
-        }
-        else if( _.isArray( options.prefix ) ) {
-          _.each( options.prefix, function(prefix) {
-            plugin_names.push( prefix+name )
-          })        
-        }
-
-        plugin_names.push( './'+name )
-
-        var parent_filename = (plugindesc.parent||{}).filename
-        var paths = parent_filename ? [ path.dirname(parent_filename) ] : [] 
-        paths = _.compact(paths.concat((plugindesc.parent||{}).paths||[]))
-
-        var plugin_paths = plugin_names.slice()
-        paths.forEach(function(path){
-          plugin_names.forEach(function(name){
-            plugin_paths.push(path+'/'+name)
-          })
-        })
-
-        var first_err
-        do {
-          var plugin_path = plugin_paths.shift()
-          initfunc = try_require(plugin_path)
-        }
-        while( _.isUndefined(initfunc) && 0 < plugin_paths.length )
-        if( first_err ) throw first_err;
-
-      }
-      else throw e;
-    }
+  return plugindesc
+}
 
 
-    if( initfunc ) {
-      if( !_.isFunction(initfunc) ) {
-        throw error('no_init_function',plugindesc)
-      }
 
-      plugindesc.init = initfunc
-    }
-    else {
-      throw error('not_found',plugindesc)
-    }
+function loadplugin( plugindesc, start_module ) {
+
+  var current_module = start_module
+  var builtin        = true
+  var level          = 0
+  var reqfunc
+  var funcdesc = {}
+
+  while( null == funcdesc.initfunc && (reqfunc = make_reqfunc( current_module )) ) {
+    funcdesc = perform_require( reqfunc, plugindesc.search, builtin, level )
+
+    if( funcdesc.error ) handle_load_error(funcdesc.error,funcdesc.search, plugindesc);
+
+    builtin = false
+    level++
+    current_module = current_module.parent
+  }
+
+  plugindesc.modulepath  = funcdesc.module
+  plugindesc.requirepath = funcdesc.require
+
+  if( funcdesc.initfunc && null != funcdesc.initfunc.name && '' != funcdesc.initfunc.name ) {
+    plugindesc.name = funcdesc.initfunc.name
+  }
+
+  plugindesc.init = funcdesc.initfunc
+}
+
+
+function handle_load_error( err, search, plugindesc ) {
+  plugindesc.err    = err
+  plugindesc.search = search
+
+  if( err instanceof SyntaxError ) {
+    throw error('syntax_error',plugindesc)
+  }
+  else {
+    throw error('load_failed',plugindesc)
   }
 }
 
 
-// #### Export the make function
-module.exports = make
+function make_reqfunc( module ) {
+  if( null == module ) return null;
+  //console.log('RF:'+module.id)
+  var reqfunc = _.bind(module.require,module)
+  reqfunc.module = module.id
+  return reqfunc
+}
 
+
+
+function perform_require( reqfunc, search_list, builtin, level ) {
+  var initfunc, search
+
+  for( var i = 0; i < search_list.length; i++ ) {
+    search = search_list[i]
+    if( !builtin && 'builtin'==search.type ) continue;
+
+    try {
+      //console.log('req '+level+' '+search.name)
+      initfunc = reqfunc( search.name )
+      break;
+    }
+    catch( e ) {
+      if( e instanceof SyntaxError ) {
+        return {error:e,search:search}
+        //console.log(e.message)
+        //console.log(e.fileName)
+        //console.log(e.lineNumber)
+      }
+    }
+  }
+  
+  return {initfunc:initfunc,module:reqfunc.module,require:search.name}
+}
+
+
+
+
+function build_plugin_names() {
+  var args = norma('{name:s, builtin:s|a?, prefix:s|a? }', arguments)
+
+  var name         = args.name
+  var builtin_list = args.builtin ? _.isArray(args.builtin) ? args.builtin : [args.builtin] : []
+  var prefix_list  = args.prefix  ? _.isArray(args.prefix)  ? args.prefix :  [args.prefix] : []
+ 
+  var plugin_names = []
+
+  _.each( builtin_list, function(builtin){
+    plugin_names.push( {type:'builtin', name:builtin+name} )
+    _.each( prefix_list, function(prefix){
+      plugin_names.push( {type:'builtin', name:builtin+prefix+name} )
+    })
+  })
+  
+  plugin_names.push( {type:'normal', name:name} )
+
+  _.each( prefix_list, function(prefix){
+    plugin_names.push( {type:'normal', name:prefix+name} )
+  })
+
+  plugin_names.push( {type:'normal', name:'./'+name} )
+
+  _.each( prefix_list, function(prefix){
+    plugin_names.push( {type:'normal', name:'./'+prefix+name} )
+  })
+
+  return plugin_names
+}

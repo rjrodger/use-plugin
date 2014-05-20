@@ -22,7 +22,7 @@
   "dependencies": {
     "underscore": "~1.6.0",
     "nid": "~0.3.2",
-    "norma": "~0.2.6",
+    "norma": "^0.2.6",
     "eraro": "~0.1.2"
   },
   "devDependencies": {

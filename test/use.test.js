@@ -21,6 +21,12 @@ describe('use', function() {
     assert.equal('p0',p0.init())
   })
 
+  it('clientlib0', function() {
+    var client0 = require('./lib0/client0')
+    var p0 = client0('p0')
+    console.log(p0)
+  })
+
 
   it('load', function() {
     var use = makeuse()
