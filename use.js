@@ -14,7 +14,7 @@ var util = require('util')
 var _     = require('underscore')
 var nid   = require('nid')
 var norma = require('norma')
-var error = require('eraro')({package:'use-plugin'})
+var eraro = require('eraro')({package:'use-plugin',msgmap:msgmap(),module:module})
 
 
 
@@ -23,38 +23,30 @@ module.exports = make
 
 
 
-
 // #### Create a new _use_ function
-function make( options ) {
+function make( useopts ) {
 
-  //console.dir(options.module)
-
-  options = _.extend({
+  useopts = _.extend({
     prefix:  'plugin-',
     builtin: '../plugin/',
     module:  module.parent
-  },options)
+  },useopts)
 
-
-  //console.log(util.inspect(module,{depth:null}))
 
 
   // This is the function that loads plugins.
   function use() {
     var args = norma("{plugin:o|f|s, options:o|s|n|b?, callback:f?}",arguments)
 
-    var plugindesc = build_plugindesc(args)
-    plugindesc.search = build_plugin_names( plugindesc.name, options.builtin, options.prefix )
-
-    console.dir(plugindesc)
-
+    var plugindesc = build_plugindesc(args,useopts)
+    plugindesc.search = build_plugin_names( plugindesc.name, useopts.builtin, useopts.prefix )
 
     if( !_.isFunction( plugindesc.init ) ) {
-      loadplugin( plugindesc, options.module )      
+      loadplugin( plugindesc, useopts.module )      
     }
 
     if( !_.isFunction( plugindesc.init ) ) {
-      throw error('not_found',plugindesc)
+      throw eraro('not_found',plugindesc)
     }
 
     return plugindesc
@@ -71,7 +63,7 @@ function make( options ) {
 //   * _string_: require as a module over an extended range of _require_ calls
 //   * _function_: provide the initialization function directly
 //   * _object_: provide a custom plugin description
-function build_plugindesc( spec ) {
+function build_plugindesc( spec, useopts ) {
   var plugin = spec.plugin
 
   var options = null == spec.options ? {} : spec.options
@@ -87,21 +79,27 @@ function build_plugindesc( spec ) {
   if( _.isString( plugin ) ) {
     plugindesc.name = plugin
   }
+
   else if( _.isFunction( plugin ) ) {
     if( _.isString(plugin.name) && '' !== plugin.name ) {
       plugindesc.name = plugin.name
     }
     else {
-      var prefix = _.isArray(options.prefix) ? options.prefix[0] : options.prefix
+      var prefix = _.isArray(useopts.prefix) ? useopts.prefix[0] : useopts.prefix
       plugindesc.name = prefix+nid()
     }
 
     plugindesc.init = plugin
   }
+
   else if( _.isObject( plugin ) ) {
     plugindesc = _.extend({},plugin,plugindesc)
-    if( !_.isString(plugindesc.name) ) throw error('no_name',plugin);
-    if( null != plugindesc.init && !_.isFunction(plugindesc.init) ) throw error('no_init_function',plugin);
+
+    if( !_.isString(plugindesc.name) ) throw eraro('no_name',{plugin:plugin});
+
+    if( null != plugindesc.init && !_.isFunction(plugindesc.init) ) {
+      throw eraro('no_init_function',{name:plugindesc.name,plugin:plugin});
+    }
   }
   
   plugindesc.options = _.extend(plugindesc.options||{},options||{})
@@ -118,7 +116,7 @@ function build_plugindesc( spec ) {
 
 
   if( !plugindesc.name ) {
-    throw error('no_name',plugindesc)
+    throw eraro('no_name',plugindesc)
   }
 
   return plugindesc
@@ -137,7 +135,7 @@ function loadplugin( plugindesc, start_module ) {
   while( null == funcdesc.initfunc && (reqfunc = make_reqfunc( current_module )) ) {
     funcdesc = perform_require( reqfunc, plugindesc.search, builtin, level )
 
-    if( funcdesc.error ) handle_load_error(funcdesc.error,funcdesc.search, plugindesc);
+    if( funcdesc.error ) handle_load_error(funcdesc.error,funcdesc.found,plugindesc);
 
     builtin = false
     level++
@@ -155,22 +153,27 @@ function loadplugin( plugindesc, start_module ) {
 }
 
 
-function handle_load_error( err, search, plugindesc ) {
-  plugindesc.err    = err
-  plugindesc.search = search
+
+function handle_load_error( err, found, plugindesc ) {
+  plugindesc.err   = err
+  plugindesc.found = found
 
   if( err instanceof SyntaxError ) {
-    throw error('syntax_error',plugindesc)
+    throw eraro('syntax_error',plugindesc)
+  }
+  else if( 'MODULE_NOT_FOUND' == err.code) {
+    throw eraro('plugin_require_failed',plugindesc)
   }
   else {
-    throw error('load_failed',plugindesc)
+    throw eraro('load_failed',plugindesc)
   }
 }
 
 
+
 function make_reqfunc( module ) {
   if( null == module ) return null;
-  //console.log('RF:'+module.id)
+
   var reqfunc = _.bind(module.require,module)
   reqfunc.module = module.id
   return reqfunc
@@ -186,16 +189,22 @@ function perform_require( reqfunc, search_list, builtin, level ) {
     if( !builtin && 'builtin'==search.type ) continue;
 
     try {
-      //console.log('req '+level+' '+search.name)
       initfunc = reqfunc( search.name )
+
+      // found it! 
       break;
     }
     catch( e ) {
-      if( e instanceof SyntaxError ) {
-        return {error:e,search:search}
-        //console.log(e.message)
-        //console.log(e.fileName)
-        //console.log(e.lineNumber)
+      if( 'MODULE_NOT_FOUND' == e.code ) {
+        // require failed inside plugin
+        if( -1 == e.message.indexOf(search.name) ) {
+          return {error:e,found:search}
+        }
+        // else plain old not found, so continue searching
+      }
+
+      else {
+        return {error:e,found:search}
       }
     }
   }
@@ -235,4 +244,16 @@ function build_plugin_names() {
   })
 
   return plugin_names
+}
+
+
+function msgmap() {
+  return {
+    syntax_error: "Could not load plugin <%=name%> defined in <%=found.name%> due to syntax error: <%=err.message%>. See STDERR for details.",
+    not_found: "Could not load plugin <%=name%>; require search list: <%=_.map(search,function(s){return s.name}).join(', ')%>.",
+    plugin_require_failed: "Could not load plugin <%=name%> defined in <%=found.name%> as a require call inside the plugin failed: <%=err.message%>.",
+    no_name: "No name property found for plugin defined by Object <%=util.inspect(plugin)%>.",
+    no_init_function: "The init property is not a function for plugin <%=name%> defined by Object <%=util.inspect(plugin)%>.",
+    load_failed: "Could not load plugin <%=name%> defined in <%=found.name%> due to error: <%=err.message%>.",
+  }
 }

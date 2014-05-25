@@ -5,6 +5,6 @@
 var use = require('../..')({module:module})
 
 module.exports = function( name ) {
-  console.log('L0:'+module.id)
+  //console.log('L0:'+module.id)
   return use( name )
 }
