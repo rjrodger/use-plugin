@@ -11,10 +11,11 @@ var util = require('util')
 
 
 // #### External modules
-var _     = require('underscore')
-var nid   = require('nid')
-var norma = require('norma')
-var eraro = require('eraro')({package:'use-plugin',msgmap:msgmap(),module:module})
+var _          = require('underscore')
+var nid        = require('nid')
+var norma      = require('norma')
+var make_eraro = require('eraro')
+
 
 
 
@@ -27,22 +28,25 @@ module.exports = make
 function make( useopts ) {
 
   useopts = _.extend({
-    prefix:  'plugin-',
-    builtin: '../plugin/',
-    module:  module.parent
+    prefix:    'plugin-',
+    builtin:   '../plugin/',
+    module:    module.parent,
+    msgprefix: true
   },useopts)
 
 
+  var eraro = make_eraro({package:'use-plugin',msgmap:msgmap(),module:module,prefix:useopts.msgprefix})
+  
 
   // This is the function that loads plugins.
   function use() {
     var args = norma("{plugin:o|f|s, options:o|s|n|b?, callback:f?}",arguments)
 
-    var plugindesc = build_plugindesc(args,useopts)
+    var plugindesc = build_plugindesc(args,useopts,eraro)
     plugindesc.search = build_plugin_names( plugindesc.name, useopts.builtin, useopts.prefix )
 
     if( !_.isFunction( plugindesc.init ) ) {
-      loadplugin( plugindesc, useopts.module )      
+      loadplugin( plugindesc, useopts.module, eraro )      
     }
 
     if( !_.isFunction( plugindesc.init ) ) {
@@ -63,7 +67,7 @@ function make( useopts ) {
 //   * _string_: require as a module over an extended range of _require_ calls
 //   * _function_: provide the initialization function directly
 //   * _object_: provide a custom plugin description
-function build_plugindesc( spec, useopts ) {
+function build_plugindesc( spec, useopts, eraro ) {
   var plugin = spec.plugin
 
   var options = null == spec.options ? {} : spec.options
@@ -124,7 +128,7 @@ function build_plugindesc( spec, useopts ) {
 
 
 
-function loadplugin( plugindesc, start_module ) {
+function loadplugin( plugindesc, start_module, eraro ) {
 
   var current_module = start_module
   var builtin        = true
@@ -135,7 +139,7 @@ function loadplugin( plugindesc, start_module ) {
   while( null == funcdesc.initfunc && (reqfunc = make_reqfunc( current_module )) ) {
     funcdesc = perform_require( reqfunc, plugindesc.search, builtin, level )
 
-    if( funcdesc.error ) handle_load_error(funcdesc.error,funcdesc.found,plugindesc);
+    if( funcdesc.error ) handle_load_error(funcdesc.error,funcdesc.found,plugindesc,eraro);
 
     builtin = false
     level++
@@ -154,7 +158,7 @@ function loadplugin( plugindesc, start_module ) {
 
 
 
-function handle_load_error( err, found, plugindesc ) {
+function handle_load_error( err, found, plugindesc, eraro ) {
   plugindesc.err   = err
   plugindesc.found = found
 
