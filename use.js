@@ -166,7 +166,7 @@ function handle_load_error( err, found, plugindesc, eraro ) {
     throw eraro('syntax_error',plugindesc)
   }
   else if( 'MODULE_NOT_FOUND' == err.code) {
-    throw eraro('plugin_require_failed',plugindesc)
+    throw eraro('require_failed',plugindesc)
   }
   else {
     throw eraro('load_failed',plugindesc)
@@ -255,7 +255,7 @@ function msgmap() {
   return {
     syntax_error: "Could not load plugin <%=name%> defined in <%=found.name%> due to syntax error: <%=err.message%>. See STDERR for details.",
     not_found: "Could not load plugin <%=name%>; require search list: <%=_.map(search,function(s){return s.name}).join(', ')%>.",
-    plugin_require_failed: "Could not load plugin <%=name%> defined in <%=found.name%> as a require call inside the plugin failed: <%=err.message%>.",
+    require_failed: "Could not load plugin <%=name%> defined in <%=found.name%> as a require call inside the plugin failed: <%=err.message%>.",
     no_name: "No name property found for plugin defined by Object <%=util.inspect(plugin)%>.",
     no_init_function: "The init property is not a function for plugin <%=name%> defined by Object <%=util.inspect(plugin)%>.",
     load_failed: "Could not load plugin <%=name%> defined in <%=found.name%> due to error: <%=err.message%>.",
