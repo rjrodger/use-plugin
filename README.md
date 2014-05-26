@@ -37,6 +37,14 @@ var fm = require('myframework')
 fm.use('bar')
 ```
 
+# Install
+
+```bash
+npm install use-plugin
+```
+
+There's an [npm module page for use-plugin](https://www.npmjs.org/package/use-plugin).
+
 # Usage
 
 The module provides a builder function that you call with your desired options.
