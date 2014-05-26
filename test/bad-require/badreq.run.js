@@ -25,13 +25,14 @@ catch(e) {
 
 // syntax error
 try {
+  console.log('SYNTAX ERROR MESSAGE TO STDERR EXPECTED! TEST IS OK')
   use('br1')
 }
 catch(e) {
-  console.log(e.message)
   assert.equal('syntax_error',e.code)
   assert.equal('br1',e.details.name)
   assert.equal('./br1',e.details.found.name)
+  assert.equal("use-plugin: Could not load plugin br1 defined in ./br1 due to syntax error: Unexpected identifier. See STDERR for details.",e.message)
 }
 
 
@@ -40,10 +41,10 @@ try {
   use('br2')
 }
 catch(e) {
-  console.log(e.message)
-  assert.equal('plugin_require_failed',e.code)
+  assert.equal('require_failed',e.code)
   assert.equal('br2',e.details.name)
   assert.equal('./br2',e.details.found.name)
+  assert.equal("use-plugin: Could not load plugin br2 defined in ./br2 as a require call inside the plugin failed: Cannot find module 'notamodule'.",e.message)
 }
 
 
@@ -52,11 +53,10 @@ try {
   use('br3')
 }
 catch(e) {
-  console.log(e.message)
-  console.log(e)
-  //assert.equal('plugin_require_failed',e.code)
-  //assert.equal('br2',e.details.name)
-  //assert.equal('./br2',e.details.found.name)
+  assert.equal('load_failed',e.code)
+  assert.equal('br3',e.details.name)
+  assert.equal('./br3',e.details.found.name)
+  assert.equal("use-plugin: Could not load plugin br3 defined in ./br3 due to error: a is not defined.",e.message)
 }
 
 
