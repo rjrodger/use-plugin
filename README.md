@@ -40,7 +40,7 @@ fm.use('bar')
 # Usage
 
 The module provides a builder function that you call with your desired options.
-In particular, you should also set your module, as above.
+In particular, you should always set your module, as above.
 
 The builder function returns a plugin loader function that you can use
 inside your framework.  Calling the loader function returns an object
@@ -57,7 +57,7 @@ See the [annotated source code](http://rjrodger.github.io/use-plugin/doc/use.htm
 
 If you're using this module, feel free to contact me on twitter if you have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.1.3
+Current Version: 0.1.4
 
 Tested on: node 0.10.26
 
