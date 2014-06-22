@@ -261,7 +261,11 @@ function perform_require( reqfunc, search_list, builtin, level ) {
   next_search_entry:
   for( var i = 0; i < search_list.length; i++ ) {
     search = search_list[i]
-    if( !builtin && 'builtin'==search.type ) continue;
+    //console.log(level,search.name)
+
+    if( !builtin && 'builtin' == search.type ) continue;
+    if( 0 == level && 'builtin' != search.type && search.name.match( /^[.\/]/ ) ) continue;
+    //console.log('try '+reqfunc.module)
 
     try {
       initfunc = reqfunc( search.name )
@@ -307,12 +311,14 @@ function build_plugin_names() {
   var plugin_names = []
 
   // Do the builtins first! But only for the framework module, see above.
-  _.each( builtin_list, function(builtin){
-    plugin_names.push( {type:'builtin', name:builtin+name} )
-    _.each( prefix_list, function(prefix){
-      plugin_names.push( {type:'builtin', name:builtin+prefix+name} )
+  if( !name.match( /^[.\/]/ ) ) {
+    _.each( builtin_list, function(builtin){
+      plugin_names.push( {type:'builtin', name:builtin+name} )
+      _.each( prefix_list, function(prefix){
+        plugin_names.push( {type:'builtin', name:builtin+prefix+name} )
+      })
     })
-  })
+  }
   
   // Vanilla require on the plugin name.
   // Common case: the require succeeds on first module parent, because the plugin is an npm module
@@ -331,6 +337,7 @@ function build_plugin_names() {
     plugin_names.push( {type:'normal', name:'./'+prefix+name} )
   })
 
+  //console.log(plugin_names)
   return plugin_names
 }
 

@@ -9,17 +9,17 @@ var util   = require('util')
 var assert = require('assert')
 
 
-var makeuse = require('..')
+var origin  = require('./origin')
 
 
 describe('use', function() {
   
   it('happy', function() {
-    var use = makeuse()
-    var p0 = use('p0')
+    var p0 = origin.use('p0')
     assert.equal('p0',p0.name)
     assert.equal('p0',p0.init())
   })
+
 
   it('clientlib0', function() {
     var client0 = require('./lib0/client0')
@@ -29,10 +29,8 @@ describe('use', function() {
 
 
   it('load', function() {
-    var use = makeuse()
-
     // still loads p0.js! $a just => tag == 'a'
-    var p0 = use('p0$a')
+    var p0 = origin.use('p0$a')
     assert.equal('p0',p0.name)
     assert.equal('a',p0.tag)
     assert.equal('p0',p0.init())
@@ -40,9 +38,7 @@ describe('use', function() {
 
 
   it('function', function() {
-    var use = makeuse()
-
-    var f0 = use( function(){ return 'f0' } )
+    var f0 = origin.use( function(){ return 'f0' } )
     //console.log(f0)
 
     assert.ok( 0 == f0.name.indexOf('plugin-'))
@@ -50,13 +46,13 @@ describe('use', function() {
     assert.ok( !f0.callback )
     assert.equal('f0',f0.init())
 
-    var f1 = use( function f1(){ return 'f1r' } )
+    var f1 = origin.use( function f1(){ return 'f1r' } )
     assert.equal( 'f1', f1.name )
     assert.ok( !f1.tag )
     assert.ok( !f1.callback )
     assert.equal('f1r',f1.init())    
 
-    var f1tc = use( function f1$t0(){ return 'f1tcr' }, function(){return 'f1tck'} )
+    var f1tc = origin.use( function f1$t0(){ return 'f1tcr' }, function(){return 'f1tck'} )
     assert.equal( 'f1', f1tc.name )
     assert.equal( 't0', f1tc.tag )
     assert.ok( 'function' == typeof(f1tc.callback) )
@@ -64,7 +60,7 @@ describe('use', function() {
     assert.equal('f1tck',f1tc.callback())    
 
 
-    var usep = makeuse({prefix:'s-'})
+    var usep = origin.makeuse({prefix:'s-'})
 
     var f2 = usep( function(){ return 'f2' } )
     assert.ok( 0 == f2.name.indexOf('s-'))
@@ -89,7 +85,7 @@ describe('use', function() {
 
 
   it('object', function() {
-    var use = makeuse()
+    var use = origin.use
 
     try { use({foo:1}); assert.fail(); } catch( e ) { 
       assert.equal('no_name',e.code) 
@@ -118,7 +114,7 @@ describe('use', function() {
 
 
   it('error', function() {
-    var use = makeuse()
+    var use = origin.use
 
     try {
       use('not-a-plugin')
