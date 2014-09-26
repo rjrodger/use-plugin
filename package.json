@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
@@ -26,9 +26,9 @@
     "eraro": "~0.1.5"
   },
   "devDependencies": {
-    "mocha": "~1.18.2",
+    "mocha": "~1.20.1",
     "docco": "~0.6.3",
-    "jshint": "~2.5.0"
+    "jshint": "~2.5.6"
   },
   "files": [
     "README.md",

@@ -6,9 +6,7 @@ var util   = require('util')
 var assert = require('assert')
 
 
-var makeuse = require('../..')
-
-var use = makeuse()
+var use = require('./badreq.js')
 
 
 // does not exist
@@ -16,7 +14,7 @@ try {
   use('br0')
 }
 catch(e) {
-  console.log(e.message)
+  //console.log(e.message)
   assert.equal('not_found',e.code)
   assert.equal('br0',e.details.name)
 }

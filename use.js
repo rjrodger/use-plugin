@@ -48,7 +48,12 @@ function make( useopts ) {
 
 
   // Setup error messages, see msgmap function below for text.
-  var eraro = make_eraro({package:'use-plugin',msgmap:msgmap(),module:module,prefix:useopts.errmsgprefix})
+  var eraro = make_eraro({
+    package: 'use-plugin',
+    msgmap:  msgmap(),
+    module:  module,
+    prefix:  useopts.errmsgprefix
+  })
   
 
   // This is the function that loads plugins.
@@ -77,10 +82,13 @@ function make( useopts ) {
     var args = norma("{plugin:o|f|s, options:o|s|n|b?, callback:f?}",arguments)
 
     var plugindesc = build_plugindesc(args,useopts,eraro)
-    plugindesc.search = build_plugin_names( plugindesc.name, useopts.builtin, useopts.prefix )
+
+    plugindesc.search = build_plugin_names( 
+      plugindesc.name, useopts.builtin, useopts.prefix )
 
     // The init function may already be defined. 
-    // If it isn't, try to load it using _require_ over the search paths and module ancestry.
+    // If it isn't, try to load it using _require_ over
+    // the search paths and module ancestry.
     if( !_.isFunction( plugindesc.init ) ) {
       loadplugin( plugindesc, useopts.module, eraro )      
     }
@@ -110,16 +118,19 @@ function build_plugindesc( spec, useopts, eraro ) {
   // Start building the return value.
   var plugindesc = {
     options:  options,
-    callback: spec.callback
+    callback: spec.callback,
+    history:  []
   }
 
 
-  // The most common case, where the plugin is specified as a string name to be required in.
+  // The most common case, where the plugin is
+  // specified as a string name to be required in.
   if( _.isString( plugin ) ) {
     plugindesc.name = plugin
   }
   
-  // Define the plugin with a function, most often used for small, on-the-fly plugins.
+  // Define the plugin with a function, most often used for small, 
+  // on-the-fly plugins.
   else if( _.isFunction( plugin ) ) {
     if( _.isString(plugin.name) && '' !== plugin.name ) {
       plugindesc.name = plugin.name
@@ -146,7 +157,8 @@ function build_plugindesc( spec, useopts, eraro ) {
   }
   
 
-  // Options as an argument to the _use_ function override options in the plugin description object.
+  // Options as an argument to the _use_ function override options
+  // in the plugin description object.
   plugindesc.options = _.extend(plugindesc.options||{},options||{})
 
 
@@ -188,10 +200,13 @@ function loadplugin( plugindesc, start_module, eraro ) {
   var funcdesc = {}
 
   // Each loop ascends the module.parent hierarchy
-  while( null == funcdesc.initfunc && (reqfunc = make_reqfunc( current_module )) ) {
-    funcdesc = perform_require( reqfunc, plugindesc.search, builtin, level )
-    
-    if( funcdesc.error ) throw handle_load_error(funcdesc.error,funcdesc.found,plugindesc,eraro);
+  while( null == funcdesc.initfunc && 
+         (reqfunc = make_reqfunc( current_module )) ) 
+  {
+    funcdesc = perform_require( reqfunc, plugindesc, builtin, level )
+
+    if( funcdesc.error ) 
+      throw handle_load_error(funcdesc.error,funcdesc.found,plugindesc,eraro);
 
     builtin = false
     level++
@@ -204,9 +219,14 @@ function loadplugin( plugindesc, start_module, eraro ) {
   plugindesc.requirepath = funcdesc.require
   plugindesc.found       = funcdesc.found
 
-  // The function name of the initfunc, if defined, sets the final name of the plugin.
-  // This replaces relative path references (like "../myplugins/foo") with a clean name ("foo").
-  if( funcdesc.initfunc && null != funcdesc.initfunc.name && '' != funcdesc.initfunc.name ) {
+  // The function name of the initfunc, if defined, 
+  // sets the final name of the plugin.
+  // This replaces relative path references (like "../myplugins/foo") 
+  // with a clean name ("foo").
+  if( funcdesc.initfunc && 
+      null != funcdesc.initfunc.name && 
+      '' != funcdesc.initfunc.name ) 
+  {
     plugindesc.name = funcdesc.initfunc.name
   }
 
@@ -230,7 +250,8 @@ function handle_load_error( err, found, plugindesc, eraro ) {
   }
 
   // Not what you think!
-  // This covers the case where the plugin contains require calls that themselves fail.
+  // This covers the case where the plugin contains 
+  // _require_ calls that themselves fail.
   else if( 'MODULE_NOT_FOUND' == err.code) {
     return eraro('require_failed',plugindesc)
   }
@@ -243,7 +264,7 @@ function handle_load_error( err, found, plugindesc, eraro ) {
 
 
 
-// #### Create a require call bound to the correct module
+// #### Create a _require_ call bound to the correct module
 function make_reqfunc( module ) {
   if( null == module ) return null;
 
@@ -255,19 +276,25 @@ function make_reqfunc( module ) {
 
 
 // #### Iterate over all the search items using the provided require function
-function perform_require( reqfunc, search_list, builtin, level ) {
+function perform_require( reqfunc, plugindesc, builtin, level ) {
+  var search_list = plugindesc.search
   var initfunc, search
+
 
   next_search_entry:
   for( var i = 0; i < search_list.length; i++ ) {
     search = search_list[i]
-    //console.log(level,search.name)
 
+    // only load builtins if builtin flag true
     if( !builtin && 'builtin' == search.type ) continue;
-    if( 0 == level && 'builtin' != search.type && search.name.match( /^[.\/]/ ) ) continue;
-    //console.log('try '+reqfunc.module)
+
+    if( 0 == level && 
+        'builtin' != search.type && 
+        search.name.match( /^[.\/]/ ) ) 
+      continue;
 
     try {
+      plugindesc.history.push({module:reqfunc.module,path:search.name})
       initfunc = reqfunc( search.name )
 
       // Found it! 
@@ -294,7 +321,7 @@ function perform_require( reqfunc, search_list, builtin, level ) {
   }
   
   // Return the init function, and a description of where we found it.
-  return {initfunc:initfunc,module:reqfunc.module,require:search.name};
+  return {initfunc:initfunc,module:reqfunc.module,require:search.name,found:search};
 }
 
 
@@ -305,8 +332,12 @@ function build_plugin_names() {
   var args = norma('{name:s, builtin:s|a?, prefix:s|a? }', arguments)
 
   var name         = args.name
-  var builtin_list = args.builtin ? _.isArray(args.builtin) ? args.builtin : [args.builtin] : []
-  var prefix_list  = args.prefix  ? _.isArray(args.prefix)  ? args.prefix :  [args.prefix] : []
+
+  var builtin_list = args.builtin ? 
+        _.isArray(args.builtin) ? args.builtin : [args.builtin] : []
+
+  var prefix_list  = args.prefix  ? 
+        _.isArray(args.prefix)  ? args.prefix :  [args.prefix] : []
  
   var plugin_names = []
 
@@ -321,7 +352,8 @@ function build_plugin_names() {
   }
   
   // Vanilla require on the plugin name.
-  // Common case: the require succeeds on first module parent, because the plugin is an npm module
+  // Common case: the require succeeds on first module parent, 
+  // because the plugin is an npm module
   // in the code calling the framework.
   plugin_names.push( {type:'normal', name:name} )
 
@@ -337,7 +369,6 @@ function build_plugin_names() {
     plugin_names.push( {type:'normal', name:'./'+prefix+name} )
   })
 
-  //console.log(plugin_names)
   return plugin_names
 }
 
