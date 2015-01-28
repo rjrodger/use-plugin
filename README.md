@@ -1,6 +1,6 @@
 # use-plugin
 
-#### Generic plugin loader functionality for Node.js frameworks.
+## Generic plugin loader functionality for Node.js frameworks.
 
 There is [annotated source code](http://rjrodger.github.io/use-plugin/doc/use.html) for this module.
 
@@ -9,8 +9,25 @@ extensions. While a simple _require_ in calling code is a good start,
 this plugin provides some convenience abstractions over vanilla _requires_
 so that you can offer a more user-friendly interface.
 
+Current Version: 0.3.0
+
+Tested on: node 0.10.35
+
+[![Build Status](https://travis-ci.org/rjrodger/use-plugin.png?branch=master)](https://travis-ci.org/rjrodger/use-plugin)
+
+[Annotated Source](http://rjrodger.github.io/use-plugin/doc/use.html)
+
+
+# Support
+
+If you're using this module, feel free to contact me on twitter if you
+have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
+
+[![Gitter chat](https://badges.gitter.im/rjrodger/zig.png)](https://gitter.im/rjrodger/zig)
+
 See the [seneca](http://github.com/rjrodger/seneca) module for an
 example of practical usage.
+
 
 # Quick example
 
@@ -115,21 +132,3 @@ If found, an object is returned describing your plugin:
    * _err_ : Error object, if any. 
    * _found_ : Internal search entry details. 
 
-
-### Source Code
-
-See the [annotated source
-code](http://rjrodger.github.io/use-plugin/doc/use.html) for full
-details.
-
-
-### Support
-
-If you're using this module, feel free to contact me on twitter if you
-have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
-
-Current Version: 0.2.0
-
-Tested on: node 0.10.31
-
-[![Build Status](https://travis-ci.org/rjrodger/use-plugin.png?branch=master)](https://travis-ci.org/rjrodger/use-plugin)
