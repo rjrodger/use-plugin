@@ -20,10 +20,10 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "license": "MIT",
   "dependencies": {
-    "underscore": "~1.6.0",
+    "lodash": "~2.4.1",
     "nid": "~0.3.2",
     "norma": "~0.2.6",
-    "eraro": "~0.1.5"
+    "eraro": "~0.4.1"
   },
   "devDependencies": {
     "mocha": "~1.20.1",

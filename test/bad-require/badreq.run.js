@@ -20,7 +20,6 @@ catch(e) {
 }
 
 
-
 // syntax error
 try {
   console.log('SYNTAX ERROR MESSAGE TO STDERR EXPECTED! TEST IS OK')
@@ -42,7 +41,7 @@ catch(e) {
   assert.equal('require_failed',e.code)
   assert.equal('br2',e.details.name)
   assert.equal('./br2',e.details.found.name)
-  assert.equal("use-plugin: Could not load plugin br2 defined in ./br2 as a require call inside the plugin failed: Cannot find module 'notamodule'.",e.message)
+  assert.equal("use-plugin: Could not load plugin br2 defined in ./br2 as a require call inside the plugin (or a module required by the plugin) failed: Error: Cannot find module 'notamodule' at Object.<anonymous> (/Users/richard/Projects/use-plugin/test/bad-require/br2.js:4:18).",e.message)
 }
 
 
@@ -55,6 +54,17 @@ catch(e) {
   assert.equal('br3',e.details.name)
   assert.equal('./br3',e.details.found.name)
   assert.equal("use-plugin: Could not load plugin br3 defined in ./br3 due to error: a is not defined.",e.message)
+}
+
+// require inside sub module used by plugin code fails
+try {
+  use('br4')
+}
+catch(e) {
+  assert.equal('require_failed',e.code)
+  assert.equal('br4',e.details.name)
+  assert.equal('./br4',e.details.found.name)
+  assert.equal("use-plugin: Could not load plugin br4 defined in ./br4 as a require call inside the plugin (or a module required by the plugin) failed: Error: Cannot find module 'missing' at Object.<anonymous> (/Users/richard/Projects/use-plugin/test/bad-require/node_modules/sub_module_missing/index.js:1:63).",e.message)
 }
 
 

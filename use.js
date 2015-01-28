@@ -1,11 +1,9 @@
-/* Copyright (c) 2014 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2015 Richard Rodger, MIT License */
+"use strict";
 /* jshint node:true, asi:true, eqnull:true */
 
 
-
 // Generic plugin loader functionality for Node.js frameworks.
-"use strict";
-
 
 
 // #### System modules
@@ -13,19 +11,15 @@ var path = require('path')
 var util = require('util')
 
 
-
 // #### External modules
-var _          = require('underscore')
+var _          = require('lodash')
 var nid        = require('nid')
 var norma      = require('norma')
 var make_eraro = require('eraro')
 
 
-
-
 // #### Exports
 module.exports = make
-
 
 
 // #### Create a _use_ function
@@ -95,6 +89,8 @@ function make( useopts ) {
 
     // No init function found, require found nothing, so throw error.
     if( !_.isFunction( plugindesc.init ) ) {
+      plugindesc.searchlist = 
+        _.map(plugindesc.search,function(s){return s.name}).join(', ') 
       throw eraro('not_found',plugindesc)
     }
 
@@ -242,6 +238,9 @@ function handle_load_error( err, found, plugindesc, eraro ) {
   plugindesc.err   = err
   plugindesc.found = found
 
+  plugindesc.found_name = plugindesc.found.name
+  plugindesc.err_msg    = err.message
+
   // Syntax error inside the plugin code.
   // Unfortunately V8 does not give us location info.
   // It does print a complaint to STDERR, so need to tell user to look there.
@@ -253,6 +252,8 @@ function handle_load_error( err, found, plugindesc, eraro ) {
   // This covers the case where the plugin contains 
   // _require_ calls that themselves fail.
   else if( 'MODULE_NOT_FOUND' == err.code) {
+    plugindesc.err_msg = err.stack.replace(/\n.*\(module\.js\:.*/g,'')
+    plugindesc.err_msg = plugindesc.err_msg.replace(/\s+/g,' ')
     return eraro('require_failed',plugindesc)
   }
 
@@ -319,7 +320,7 @@ function perform_require( reqfunc, plugindesc, builtin, level ) {
       }
     }
   }
-  
+
   // Return the init function, and a description of where we found it.
   return {initfunc:initfunc,module:reqfunc.module,require:search.name,found:search};
 }
@@ -377,11 +378,11 @@ function build_plugin_names() {
 // #### Define the error messages for this module
 function msgmap() {
   return {
-    syntax_error: "Could not load plugin <%=name%> defined in <%=found.name%> due to syntax error: <%=err.message%>. See STDERR for details.",
-    not_found: "Could not load plugin <%=name%>; require search list: <%=_.map(search,function(s){return s.name}).join(', ')%>.",
-    require_failed: "Could not load plugin <%=name%> defined in <%=found.name%> as a require call inside the plugin failed: <%=err.message%>.",
-    no_name: "No name property found for plugin defined by Object <%=util.inspect(plugin)%>.",
-    no_init_function: "The init property is not a function for plugin <%=name%> defined by Object <%=util.inspect(plugin)%>.",
-    load_failed: "Could not load plugin <%=name%> defined in <%=found.name%> due to error: <%=err.message%>.",
+    syntax_error: "Could not load plugin <%=name%> defined in <%=found_name%> due to syntax error: <%=err_msg%>. See STDERR for details.",
+    not_found: "Could not load plugin <%=name%>; require search list: <%=searchlist%>.",
+    require_failed: "Could not load plugin <%=name%> defined in <%=found_name%> as a require call inside the plugin (or a module required by the plugin) failed: <%=err_msg%>.",
+    no_name: "No name property found for plugin defined by Object <%=plugin%>.",
+    no_init_function: "The init property is not a function for plugin <%=name%> defined by Object <%=plugin%>.",
+    load_failed: "Could not load plugin <%=name%> defined in <%=found_name%> due to error: <%=err_msg%>.",
   }
 }
