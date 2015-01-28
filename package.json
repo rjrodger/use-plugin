@@ -1,13 +1,11 @@
 {
   "name": "use-plugin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha test/*.test.js; node test/bad-require/badreq.run.js; node test/dotdot/sub/dotdot.test.js",
-    "jshint": "./node_modules/.bin/jshint use.js",
-    "docco": "./node_modules/.bin/docco use.js -o doc",
-    "gh-pages-doc": "cp -r doc/* ../gh-pages/use-plugin/doc"
+    "test": "./test.sh",
+    "build": "./build.sh"
   },
   "repository": {
     "type": "git",
@@ -24,11 +22,6 @@
     "nid": "~0.3.2",
     "norma": "~0.2.6",
     "eraro": "~0.4.1"
-  },
-  "devDependencies": {
-    "mocha": "~1.20.1",
-    "docco": "~0.6.3",
-    "jshint": "~2.5.6"
   },
   "files": [
     "README.md",

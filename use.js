@@ -221,7 +221,7 @@ function loadplugin( plugindesc, start_module, eraro ) {
   // with a clean name ("foo").
   if( funcdesc.initfunc && 
       null != funcdesc.initfunc.name && 
-      '' != funcdesc.initfunc.name ) 
+      '' !== funcdesc.initfunc.name ) 
   {
     plugindesc.name = funcdesc.initfunc.name
   }
@@ -289,7 +289,7 @@ function perform_require( reqfunc, plugindesc, builtin, level ) {
     // only load builtins if builtin flag true
     if( !builtin && 'builtin' == search.type ) continue;
 
-    if( 0 == level && 
+    if( 0 === level && 
         'builtin' != search.type && 
         search.name.match( /^[.\/]/ ) ) 
       continue;

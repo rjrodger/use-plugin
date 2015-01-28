@@ -30,7 +30,8 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* Copyright (c) 2014 Richard Rodger, MIT License */</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* Copyright (c) 2014-2015 Richard Rodger, MIT License */</span>
+<span class="hljs-pi">"use strict"</span>;
 <span class="hljs-comment">/* jshint node:true, asi:true, eqnull:true */</span></pre></div></div>
             
         </li>
@@ -45,8 +46,6 @@
               <p>Generic plugin loader functionality for Node.js frameworks.</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-pi">"use strict"</span>;</pre></div></div>
             
         </li>
         
@@ -77,7 +76,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> _          = <span class="hljs-built_in">require</span>(<span class="hljs-string">'underscore'</span>)
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> _          = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>)
 <span class="hljs-keyword">var</span> nid        = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nid'</span>)
 <span class="hljs-keyword">var</span> norma      = <span class="hljs-built_in">require</span>(<span class="hljs-string">'norma'</span>)
 <span class="hljs-keyword">var</span> make_eraro = <span class="hljs-built_in">require</span>(<span class="hljs-string">'eraro'</span>)</pre></div></div>
@@ -95,7 +94,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>module.exports = make</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-built_in">module</span>.exports = make</pre></div></div>
             
         </li>
         
@@ -120,7 +119,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make</span><span class="hljs-params">( useopts )</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make</span><span class="hljs-params">( useopts )</span> </span>{</pre></div></div>
             
         </li>
         
@@ -138,7 +137,7 @@
             <div class="content"><div class='highlight'><pre>  useopts = _.extend({
     prefix:       <span class="hljs-string">'plugin-'</span>,
     builtin:      <span class="hljs-string">'../plugin/'</span>,
-    module:       module.parent,
+    <span class="hljs-built_in">module</span>:       <span class="hljs-built_in">module</span>.parent,
     errmsgprefix: <span class="hljs-literal">true</span>
   },useopts)</pre></div></div>
             
@@ -155,7 +154,12 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> eraro = make_eraro({package:<span class="hljs-string">'use-plugin'</span>,msgmap:msgmap(),module:module,prefix:useopts.errmsgprefix})</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> eraro = make_eraro({
+    package: <span class="hljs-string">'use-plugin'</span>,
+    msgmap:  msgmap(),
+    <span class="hljs-built_in">module</span>:  <span class="hljs-built_in">module</span>,
+    prefix:  useopts.errmsgprefix
+  })</pre></div></div>
             
         </li>
         
@@ -194,11 +198,13 @@ Parameters:</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">use</span><span class="hljs-params">()</span> {</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">use</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">var</span> args = norma(<span class="hljs-string">"{plugin:o|f|s, options:o|s|n|b?, callback:f?}"</span>,<span class="hljs-built_in">arguments</span>)
 
     <span class="hljs-keyword">var</span> plugindesc = build_plugindesc(args,useopts,eraro)
-    plugindesc.search = build_plugin_names( plugindesc.name, useopts.builtin, useopts.prefix )</pre></div></div>
+
+    plugindesc.search = build_plugin_names( 
+      plugindesc.name, useopts.builtin, useopts.prefix )</pre></div></div>
             
         </li>
         
@@ -210,7 +216,8 @@ Parameters:</p>
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>The init function may already be defined. 
-If it isn’t, try to load it using <em>require</em> over the search paths and module ancestry.</p>
+If it isn’t, try to load it using <em>require</em> over
+the search paths and module ancestry.</p>
 
             </div>
             
@@ -232,6 +239,8 @@ If it isn’t, try to load it using <em>require</em> over the search paths and m
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span>( !_.isFunction( plugindesc.init ) ) {
+      plugindesc.searchlist = 
+        _.map(plugindesc.search,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(s)</span></span>{<span class="hljs-keyword">return</span> s.name}).join(<span class="hljs-string">', '</span>) 
       <span class="hljs-keyword">throw</span> eraro(<span class="hljs-string">'not_found'</span>,plugindesc)
     }
 
@@ -254,7 +263,7 @@ If it isn’t, try to load it using <em>require</em> over the search paths and m
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build_plugindesc</span><span class="hljs-params">( spec, useopts, eraro )</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build_plugindesc</span><span class="hljs-params">( spec, useopts, eraro )</span> </span>{
   <span class="hljs-keyword">var</span> plugin = spec.plugin</pre></div></div>
             
         </li>
@@ -288,7 +297,8 @@ If it isn’t, try to load it using <em>require</em> over the search paths and m
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> plugindesc = {
     options:  options,
-    callback: spec.callback
+    callback: spec.callback,
+    history:  []
   }</pre></div></div>
             
         </li>
@@ -300,7 +310,8 @@ If it isn’t, try to load it using <em>require</em> over the search paths and m
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p>The most common case, where the plugin is specified as a string name to be required in.</p>
+              <p>The most common case, where the plugin is
+specified as a string name to be required in.</p>
 
             </div>
             
@@ -317,7 +328,8 @@ If it isn’t, try to load it using <em>require</em> over the search paths and m
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>Define the plugin with a function, most often used for small, on-the-fly plugins.</p>
+              <p>Define the plugin with a function, most often used for small, 
+on-the-fly plugins.</p>
 
             </div>
             
@@ -379,7 +391,8 @@ If it isn’t, try to load it using <em>require</em> over the search paths and m
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>Options as an argument to the <em>use</em> function override options in the plugin description object.</p>
+              <p>Options as an argument to the <em>use</em> function override options
+in the plugin description object.</p>
 
             </div>
             
@@ -437,18 +450,18 @@ Note: the $tag suffix is NOT considered part of the file name!</p>
               </div>
               <h4 id="attempt-to-load-the-plugin">Attempt to load the plugin</h4>
 <p>The following algorithm is used:</p>
-<pre><code><span class="hljs-number">0.</span> WHILE module defined
+<pre><code><span class="hljs-number">0.</span> WHILE <span class="hljs-built_in">module</span> defined
 <span class="hljs-number">1.</span>   FOR EACH search-entry
-<span class="hljs-number">2.</span>     IF NOT first module IGNORE builtins 
+<span class="hljs-number">2.</span>     IF NOT first <span class="hljs-built_in">module</span> IGNORE builtins 
 <span class="hljs-number">3.</span>     PERFORM <span class="hljs-built_in">require</span> ON search-entry.name
 <span class="hljs-number">4.</span>     IF FOUND BREAK
 <span class="hljs-number">5.</span>     IF ERROR THROW # construct contextual info
 <span class="hljs-number">6.</span>   IF FOUND update plugindesc, BREAK
-<span class="hljs-number">7.</span>   IF NOT FOUND module = module.parent 
+<span class="hljs-number">7.</span>   IF NOT FOUND <span class="hljs-built_in">module</span> = <span class="hljs-built_in">module</span>.parent 
 </code></pre>
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadplugin</span><span class="hljs-params">( plugindesc, start_module, eraro )</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadplugin</span><span class="hljs-params">( plugindesc, start_module, eraro )</span> </span>{
   <span class="hljs-keyword">var</span> current_module = start_module
   <span class="hljs-keyword">var</span> builtin        = <span class="hljs-literal">true</span>
   <span class="hljs-keyword">var</span> level          = <span class="hljs-number">0</span>
@@ -468,10 +481,13 @@ Note: the $tag suffix is NOT considered part of the file name!</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">while</span>( <span class="hljs-literal">null</span> == funcdesc.initfunc &amp;&amp; (reqfunc = make_reqfunc( current_module )) ) {
-    funcdesc = perform_require( reqfunc, plugindesc.search, builtin, level )
-    
-    <span class="hljs-keyword">if</span>( funcdesc.error ) <span class="hljs-keyword">throw</span> handle_load_error(funcdesc.error,funcdesc.found,plugindesc,eraro);
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">while</span>( <span class="hljs-literal">null</span> == funcdesc.initfunc &amp;&amp; 
+         (reqfunc = make_reqfunc( current_module )) ) 
+  {
+    funcdesc = perform_require( reqfunc, plugindesc, builtin, level )
+
+    <span class="hljs-keyword">if</span>( funcdesc.error ) 
+      <span class="hljs-keyword">throw</span> handle_load_error(funcdesc.error,funcdesc.found,plugindesc,eraro);
 
     builtin = <span class="hljs-literal">false</span>
     level++
@@ -505,12 +521,17 @@ This is useful for debugging, especially if the “wrong” plugin is loaded.</p
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
-              <p>The function name of the initfunc, if defined, sets the final name of the plugin.
-This replaces relative path references (like “../myplugins/foo”) with a clean name (“foo”).</p>
+              <p>The function name of the initfunc, if defined, 
+sets the final name of the plugin.
+This replaces relative path references (like “../myplugins/foo”) 
+with a clean name (“foo”).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span>( funcdesc.initfunc &amp;&amp; <span class="hljs-literal">null</span> != funcdesc.initfunc.name &amp;&amp; <span class="hljs-string">''</span> != funcdesc.initfunc.name ) {
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span>( funcdesc.initfunc &amp;&amp; 
+      <span class="hljs-literal">null</span> != funcdesc.initfunc.name &amp;&amp; 
+      <span class="hljs-string">''</span> !== funcdesc.initfunc.name ) 
+  {
     plugindesc.name = funcdesc.initfunc.name
   }</pre></div></div>
             
@@ -544,9 +565,12 @@ This replaces relative path references (like “../myplugins/foo”) with a clea
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle_load_error</span><span class="hljs-params">( err, found, plugindesc, eraro )</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle_load_error</span><span class="hljs-params">( err, found, plugindesc, eraro )</span> </span>{
   plugindesc.err   = err
-  plugindesc.found = found</pre></div></div>
+  plugindesc.found = found
+
+  plugindesc.found_name = plugindesc.found.name
+  plugindesc.err_msg    = err.message</pre></div></div>
             
         </li>
         
@@ -577,11 +601,14 @@ It does print a complaint to STDERR, so need to tell user to look there.</p>
                 <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Not what you think!
-This covers the case where the plugin contains require calls that themselves fail.</p>
+This covers the case where the plugin contains 
+<em>require</em> calls that themselves fail.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>( <span class="hljs-string">'MODULE_NOT_FOUND'</span> == err.code) {
+    plugindesc.err_msg = err.stack.replace(<span class="hljs-regexp">/\n.*\(module\.js\:.*/g</span>,<span class="hljs-string">''</span>)
+    plugindesc.err_msg = plugindesc.err_msg.replace(<span class="hljs-regexp">/\s+/g</span>,<span class="hljs-string">' '</span>)
     <span class="hljs-keyword">return</span> eraro(<span class="hljs-string">'require_failed'</span>,plugindesc)
   }</pre></div></div>
             
@@ -612,15 +639,15 @@ This covers the case where the plugin contains require calls that themselves fai
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
-              <h4 id="create-a-require-call-bound-to-the-correct-module">Create a require call bound to the correct module</h4>
+              <h4 id="create-a-_require_-call-bound-to-the-correct-module">Create a <em>require</em> call bound to the correct module</h4>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_reqfunc</span><span class="hljs-params">( module )</span> {</span>
-  <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> == module ) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make_reqfunc</span><span class="hljs-params">( module )</span> </span>{
+  <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> == <span class="hljs-built_in">module</span> ) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
 
-  <span class="hljs-keyword">var</span> reqfunc = _.bind(module.require,module)
-  reqfunc.module = module.id
+  <span class="hljs-keyword">var</span> reqfunc = _.bind(<span class="hljs-built_in">module</span>.require,<span class="hljs-built_in">module</span>)
+  reqfunc.module = <span class="hljs-built_in">module</span>.id
   <span class="hljs-keyword">return</span> reqfunc
 }</pre></div></div>
             
@@ -637,16 +664,14 @@ This covers the case where the plugin contains require calls that themselves fai
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">perform_require</span><span class="hljs-params">( reqfunc, search_list, builtin, level )</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">perform_require</span><span class="hljs-params">( reqfunc, plugindesc, builtin, level )</span> </span>{
+  <span class="hljs-keyword">var</span> search_list = plugindesc.search
   <span class="hljs-keyword">var</span> initfunc, search
+
 
   next_search_entry:
   <span class="hljs-keyword">for</span>( <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; search_list.length; i++ ) {
-    search = search_list[i]
-    <span class="hljs-keyword">if</span>( !builtin &amp;&amp; <span class="hljs-string">'builtin'</span>==search.type ) <span class="hljs-keyword">continue</span>;
-
-    <span class="hljs-keyword">try</span> {
-      initfunc = reqfunc( search.name )</pre></div></div>
+    search = search_list[i]</pre></div></div>
             
         </li>
         
@@ -656,6 +681,30 @@ This covers the case where the plugin contains require calls that themselves fai
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>only load builtins if builtin flag true</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span>( !builtin &amp;&amp; <span class="hljs-string">'builtin'</span> == search.type ) <span class="hljs-keyword">continue</span>;
+
+    <span class="hljs-keyword">if</span>( <span class="hljs-number">0</span> === level &amp;&amp; 
+        <span class="hljs-string">'builtin'</span> != search.type &amp;&amp; 
+        search.name.match( <span class="hljs-regexp">/^[.\/]/</span> ) ) 
+      <span class="hljs-keyword">continue</span>;
+
+    <span class="hljs-keyword">try</span> {
+      plugindesc.history.push({<span class="hljs-built_in">module</span>:reqfunc.module,path:search.name})
+      initfunc = reqfunc( search.name )</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Found it! </p>
 
@@ -669,11 +718,11 @@ This covers the case where the plugin contains require calls that themselves fai
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>A require failed inside the plugin.</p>
 
@@ -686,11 +735,11 @@ This covers the case where the plugin contains require calls that themselves fai
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Plain old not found, so continue searching.</p>
 
@@ -704,11 +753,11 @@ This covers the case where the plugin contains require calls that themselves fai
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>The require failed for some other reason.</p>
 
@@ -722,41 +771,18 @@ This covers the case where the plugin contains require calls that themselves fai
         </li>
         
         
-        <li id="section-37">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
-              </div>
-              <p>Return the init function, and a description of where we found it.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">return</span> {initfunc:initfunc,module:reqfunc.module,<span class="hljs-built_in">require</span>:search.name};
-}</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <h4 id="create-the-list-of-require-search-locations">Create the list of require search locations</h4>
-<p>Searches are performed without the prefix first</p>
+              <p>Return the init function, and a description of where we found it.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build_plugin_names</span><span class="hljs-params">()</span> {</span>
-  <span class="hljs-keyword">var</span> args = norma(<span class="hljs-string">'{name:s, builtin:s|a?, prefix:s|a? }'</span>, <span class="hljs-built_in">arguments</span>)
-
-  <span class="hljs-keyword">var</span> name         = args.name
-  <span class="hljs-keyword">var</span> builtin_list = args.builtin ? _.isArray(args.builtin) ? args.builtin : [args.builtin] : []
-  <span class="hljs-keyword">var</span> prefix_list  = args.prefix  ? _.isArray(args.prefix)  ? args.prefix :  [args.prefix] : []
- 
-  <span class="hljs-keyword">var</span> plugin_names = []</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">return</span> {initfunc:initfunc,<span class="hljs-built_in">module</span>:reqfunc.module,<span class="hljs-built_in">require</span>:search.name,found:search};
+}</pre></div></div>
             
         </li>
         
@@ -767,16 +793,23 @@ This covers the case where the plugin contains require calls that themselves fai
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
-              <p>Do the builtins first! But only for the framework module, see above.</p>
+              <h4 id="create-the-list-of-require-search-locations">Create the list of require search locations</h4>
+<p>Searches are performed without the prefix first</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  _.each( builtin_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(builtin)</span>{</span>
-    plugin_names.push( {type:<span class="hljs-string">'builtin'</span>, name:builtin+name} )
-    _.each( prefix_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(prefix)</span>{</span>
-      plugin_names.push( {type:<span class="hljs-string">'builtin'</span>, name:builtin+prefix+name} )
-    })
-  })</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build_plugin_names</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> args = norma(<span class="hljs-string">'{name:s, builtin:s|a?, prefix:s|a? }'</span>, <span class="hljs-built_in">arguments</span>)
+
+  <span class="hljs-keyword">var</span> name         = args.name
+
+  <span class="hljs-keyword">var</span> builtin_list = args.builtin ? 
+        _.isArray(args.builtin) ? args.builtin : [args.builtin] : []
+
+  <span class="hljs-keyword">var</span> prefix_list  = args.prefix  ? 
+        _.isArray(args.prefix)  ? args.prefix :  [args.prefix] : []
+ 
+  <span class="hljs-keyword">var</span> plugin_names = []</pre></div></div>
             
         </li>
         
@@ -787,13 +820,18 @@ This covers the case where the plugin contains require calls that themselves fai
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
-              <p>Vanilla require on the plugin name.
-Common case: the require succeeds on first module parent, because the plugin is an npm module
-in the code calling the framework.</p>
+              <p>Do the builtins first! But only for the framework module, see above.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:name} )</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span>( !name.match( <span class="hljs-regexp">/^[.\/]/</span> ) ) {
+    _.each( builtin_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(builtin)</span></span>{
+      plugin_names.push( {type:<span class="hljs-string">'builtin'</span>, name:builtin+name} )
+      _.each( prefix_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(prefix)</span></span>{
+        plugin_names.push( {type:<span class="hljs-string">'builtin'</span>, name:builtin+prefix+name} )
+      })
+    })
+  }</pre></div></div>
             
         </li>
         
@@ -804,13 +842,14 @@ in the code calling the framework.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
-              <p>Try the prefix next.</p>
+              <p>Vanilla require on the plugin name.
+Common case: the require succeeds on first module parent, 
+because the plugin is an npm module
+in the code calling the framework.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  _.each( prefix_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(prefix)</span>{</span>
-    plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:prefix+name} )
-  })</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:name} )</pre></div></div>
             
         </li>
         
@@ -821,18 +860,13 @@ in the code calling the framework.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <p>OK, probably not an npm module, try locally.</p>
+              <p>Try the prefix next.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:<span class="hljs-string">'./'</span>+name} )
-
-  _.each( prefix_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(prefix)</span>{</span>
-    plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:<span class="hljs-string">'./'</span>+prefix+name} )
-  })
-
-  <span class="hljs-keyword">return</span> plugin_names
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  _.each( prefix_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(prefix)</span></span>{
+    plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:prefix+name} )
+  })</pre></div></div>
             
         </li>
         
@@ -843,18 +877,40 @@ in the code calling the framework.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
+              <p>OK, probably not an npm module, try locally.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:<span class="hljs-string">'./'</span>+name} )
+
+  _.each( prefix_list, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(prefix)</span></span>{
+    plugin_names.push( {type:<span class="hljs-string">'normal'</span>, name:<span class="hljs-string">'./'</span>+prefix+name} )
+  })
+
+  <span class="hljs-keyword">return</span> plugin_names
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
               <h4 id="define-the-error-messages-for-this-module">Define the error messages for this module</h4>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">msgmap</span><span class="hljs-params">()</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">msgmap</span><span class="hljs-params">()</span> </span>{
   <span class="hljs-keyword">return</span> {
-    syntax_error: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt; defined in &lt;%=found.name%&gt; due to syntax error: &lt;%=err.message%&gt;. See STDERR for details."</span>,
-    not_found: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt;; require search list: &lt;%=_.map(search,function(s){return s.name}).join(', ')%&gt;."</span>,
-    require_failed: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt; defined in &lt;%=found.name%&gt; as a require call inside the plugin failed: &lt;%=err.message%&gt;."</span>,
-    no_name: <span class="hljs-string">"No name property found for plugin defined by Object &lt;%=util.inspect(plugin)%&gt;."</span>,
-    no_init_function: <span class="hljs-string">"The init property is not a function for plugin &lt;%=name%&gt; defined by Object &lt;%=util.inspect(plugin)%&gt;."</span>,
-    load_failed: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt; defined in &lt;%=found.name%&gt; due to error: &lt;%=err.message%&gt;."</span>,
+    syntax_error: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt; defined in &lt;%=found_name%&gt; due to syntax error: &lt;%=err_msg%&gt;. See STDERR for details."</span>,
+    not_found: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt;; require search list: &lt;%=searchlist%&gt;."</span>,
+    require_failed: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt; defined in &lt;%=found_name%&gt; as a require call inside the plugin (or a module required by the plugin) failed: &lt;%=err_msg%&gt;."</span>,
+    no_name: <span class="hljs-string">"No name property found for plugin defined by Object &lt;%=plugin%&gt;."</span>,
+    no_init_function: <span class="hljs-string">"The init property is not a function for plugin &lt;%=name%&gt; defined by Object &lt;%=plugin%&gt;."</span>,
+    load_failed: <span class="hljs-string">"Could not load plugin &lt;%=name%&gt; defined in &lt;%=found_name%&gt; due to error: &lt;%=err_msg%&gt;."</span>,
   }
 }</pre></div></div>
             
