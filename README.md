@@ -2,20 +2,20 @@
 
 ## Generic plugin loader functionality for Node.js frameworks.
 
-There is [annotated source code](http://rjrodger.github.io/use-plugin/doc/use.html) for this module.
-
 For use in framework modules to provide a plugin mechanism for
 extensions. While a simple _require_ in calling code is a good start,
 this plugin provides some convenience abstractions over vanilla _requires_
 so that you can offer a more user-friendly interface.
 
-Current Version: 0.3.0
+Current Version: 0.3.1
 
-Tested on: node 0.10.35
+Tested on: node 0.10.36
 
 [![Build Status](https://travis-ci.org/rjrodger/use-plugin.png?branch=master)](https://travis-ci.org/rjrodger/use-plugin)
 
 [Annotated Source](http://rjrodger.github.io/use-plugin/doc/use.html)
+
+[![Gitter chat](https://badges.gitter.im/rjrodger/use-plugin.png)](https://gitter.im/rjrodger/use-plugin)
 
 
 # Support
