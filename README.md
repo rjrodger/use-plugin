@@ -7,10 +7,6 @@ extensions. While a simple _require_ in calling code is a good start,
 this plugin provides some convenience abstractions over vanilla _requires_
 so that you can offer a more user-friendly interface.
 
-Current Version: 0.3.1
-
-Tested on: node 0.10.36
-
 [![Build Status](https://travis-ci.org/rjrodger/use-plugin.png?branch=master)](https://travis-ci.org/rjrodger/use-plugin)
 
 [Annotated Source](http://rjrodger.github.io/use-plugin/doc/use.html)
@@ -20,10 +16,10 @@ Tested on: node 0.10.36
 
 # Support
 
-If you're using this module, feel free to contact me on twitter if you
-have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
+If you're using this module, feel free to contact us on twitter if you
+have any questions! :) [@senecajs](http://twitter.com/senecajs)
 
-[![Gitter chat](https://badges.gitter.im/rjrodger/zig.png)](https://gitter.im/rjrodger/zig)
+[![Gitter chat](https://badges.gitter.im/rjrodger/use-plugin.png)](https://gitter.im/rjrodger/use-plugin)
 
 See the [seneca](http://github.com/rjrodger/seneca) module for an
 example of practical usage.

@@ -52,7 +52,8 @@ describe('use', function() {
     assert.ok( !f1.callback )
     assert.equal('f1r',f1.init())    
 
-    var f1tc = origin.use( function f1$t0(){ return 'f1tcr' }, function(){return 'f1tck'} )
+    var f1tc = origin.use( function f1$t0(){ return 'f1tcr' }, 
+                           function(){return 'f1tck'} )
     assert.equal( 'f1', f1tc.name )
     assert.equal( 't0', f1tc.tag )
     assert.ok( 'function' == typeof(f1tc.callback) )
@@ -82,6 +83,11 @@ describe('use', function() {
     assert.equal('f3tck',f3tc.callback())    
   })
 
+
+  it('function-options', function() {
+    var f1 = origin.use(function f1 () {},  {a: 1})
+    assert.equal(f1.options.a, 1)
+  })
 
 
   it('object', function() {

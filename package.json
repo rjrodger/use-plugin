@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
@@ -18,15 +18,15 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "license": "MIT",
   "dependencies": {
-    "lodash": "~2.4.1",
-    "nid": "~0.3.2",
-    "norma": "~0.3.0",
-    "eraro": "~0.4.1"
+    "lodash": "4.15",
+    "nid": "0.3",
+    "norma": "0.3",
+    "eraro": "0.4"
   },
   "devDependencies": {
-    "docco": "~0.6.3",
-    "jshint": "~2.6.0",
-    "mocha": "~2.1.0"
+    "docco": "0.7",
+    "jshint": "2.9",
+    "mocha": "3.2"
   },
   "files": [
     "README.md",
