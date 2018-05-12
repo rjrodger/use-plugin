@@ -1,3 +1,3 @@
-
-module.exports = function(){ return 'repl' }
-
+module.exports = function() {
+  return 'repl'
+}
