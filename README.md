@@ -12,19 +12,12 @@ extensions. While a simple _require_ in calling code is a good start,
 this plugin provides some convenience abstractions over vanilla _requires_
 so that you can offer a more user-friendly interface.
 
-[![Build Status](https://travis-ci.org/rjrodger/use-plugin.png?branch=master)](https://travis-ci.org/rjrodger/use-plugin)
-
-[![Gitter chat](https://badges.gitter.im/rjrodger/use-plugin.png)](https://gitter.im/rjrodger/use-plugin)
-
-
 # Support
 
 If you're using this module, feel free to contact us on twitter if you
 have any questions! :) [@senecajs](http://twitter.com/senecajs)
 
-[![Gitter chat](https://badges.gitter.im/rjrodger/use-plugin.png)](https://gitter.im/rjrodger/use-plugin)
-
-See the [seneca](http://github.com/rjrodger/seneca) module for an
+See the [seneca](http://github.com/senecajs/seneca) module for an
 example of practical usage.
 
 
