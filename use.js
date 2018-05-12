@@ -37,7 +37,8 @@ function make( useopts ) {
     prefix:       'plugin-',
     builtin:      '../plugin/',
     module:       module.parent,
-    errmsgprefix: true
+    errmsgprefix: true,
+    system_modules: intern.make_system_modules()
   },useopts)
 
 
@@ -78,7 +79,7 @@ function make( useopts ) {
     var plugindesc = build_plugindesc(args,useopts,eraro)
 
     plugindesc.search = build_plugin_names( 
-      plugindesc.name, useopts.builtin, useopts.prefix )
+      plugindesc.name, useopts.builtin, useopts.prefix, useopts.system_modules )
 
     // The init function may already be defined. 
     // If it isn't, try to load it using _require_ over
@@ -330,7 +331,7 @@ function perform_require( reqfunc, plugindesc, builtin, level ) {
 // #### Create the list of require search locations
 // Searches are performed without the prefix first
 function build_plugin_names() {
-  var args = norma('{name:s, builtin:s|a?, prefix:s|a? }', arguments)
+  var args = norma('{name:s, builtin:s|a?, prefix:s|a?, system:a?}', arguments)
 
   var name         = args.name
 
@@ -338,8 +339,10 @@ function build_plugin_names() {
         _.isArray(args.builtin) ? args.builtin : [args.builtin] : []
 
   var prefix_list  = args.prefix  ? 
-        _.isArray(args.prefix)  ? args.prefix :  [args.prefix] : []
- 
+        _.isArray(args.prefix)  ? args.prefix : [args.prefix] : []
+
+  var system_modules = args.system || []
+  
   var plugin_names = []
 
   // Do the builtins first! But only for the framework module, see above.
@@ -356,8 +359,11 @@ function build_plugin_names() {
   // Common case: the require succeeds on first module parent, 
   // because the plugin is an npm module
   // in the code calling the framework.
-  plugin_names.push( {type:'normal', name:name} )
-
+  // You can't load node system modules as plugins, however.
+  if( !system_modules.includes[name] ) {
+    plugin_names.push( {type:'normal', name:name} )
+  }
+  
   // Try the prefix next.
   _.each( prefix_list, function(prefix){
     plugin_names.push( {type:'normal', name:prefix+name} )
@@ -375,6 +381,8 @@ function build_plugin_names() {
 
 
 
+
+
 // #### Define the error messages for this module
 function msgmap() {
   return {
@@ -386,3 +394,20 @@ function msgmap() {
     load_failed: "Could not load plugin <%=name%> defined in <%=found_name%> due to error: <%=err_msg%>.",
   }
 }
+
+
+const intern = (module.exports.intern = {
+  make_system_modules: function() {
+    const sm = []
+    if(process.moduleLoadList) {
+      for(var i = 0; i < process.moduleLoadList.length; i++) {
+        var entry = process.moduleLoadList[i].match(/^\w+ ([\w_]+)$/)
+        if(entry) {
+          sm.push(entry[1])
+        }
+      }
+    }
+    return sm
+  }
+})
+

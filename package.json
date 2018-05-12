@@ -4,8 +4,7 @@
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
-    "test": "./test.sh",
-    "build": "./build.sh"
+    "test": "./test.sh"
   },
   "repository": {
     "type": "git",
@@ -18,15 +17,13 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "license": "MIT",
   "dependencies": {
-    "lodash": "4.15",
+    "lodash": "4.17",
     "nid": "0.3",
     "norma": "0.3",
     "eraro": "0.4"
   },
   "devDependencies": {
-    "docco": "0.7",
-    "jshint": "2.9",
-    "mocha": "3.2"
+    "mocha": "3"
   },
   "files": [
     "README.md",

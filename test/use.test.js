@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2015 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2018 Richard Rodger, MIT License */
 "use strict";
 
 
@@ -8,6 +8,8 @@
 var util   = require('util')
 var assert = require('assert')
 
+
+var Use = require('../')
 
 var origin  = require('./origin')
 
@@ -134,6 +136,9 @@ describe('use', function() {
   })
 
 
+  it('intern-make_system_modules', function(fin) {
+    assert(Use.intern.make_system_modules().length > 0)
+    fin()
+  })
   
 })
-
