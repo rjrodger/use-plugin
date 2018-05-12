@@ -1,5 +1,10 @@
 # use-plugin
 
+[![Npm][BadgeNpm]][Npm]
+[![Travis][BadgeTravis]][Travis]
+[![Coveralls][BadgeCoveralls]][Coveralls]
+
+
 ## Generic plugin loader functionality for Node.js frameworks.
 
 For use in framework modules to provide a plugin mechanism for
@@ -8,8 +13,6 @@ this plugin provides some convenience abstractions over vanilla _requires_
 so that you can offer a more user-friendly interface.
 
 [![Build Status](https://travis-ci.org/rjrodger/use-plugin.png?branch=master)](https://travis-ci.org/rjrodger/use-plugin)
-
-[Annotated Source](http://rjrodger.github.io/use-plugin/doc/use.html)
 
 [![Gitter chat](https://badges.gitter.im/rjrodger/use-plugin.png)](https://gitter.im/rjrodger/use-plugin)
 
@@ -89,6 +92,9 @@ value can be any of string, function or object, to which the same
 rules apply. In particular, you need to explicitly provide a _name_
 property if you want an explicit name.
 
+Note that plugins cannot have the same names as builtin Node.js modules.
+
+
 # Plugin Name Resolution
 
 The name of the plugin is determined by the following procedure:
@@ -128,3 +134,11 @@ If found, an object is returned describing your plugin:
    * _err_ : Error object, if any. 
    * _found_ : Internal search entry details. 
 
+
+
+[BadgeCoveralls]: https://coveralls.io/repos/rjrodger/use-plugin/badge.svg?branch=master&service=github
+[BadgeNpm]: https://badge.fury.io/js/use-plugin.svg
+[BadgeTravis]: https://travis-ci.org/rjrodger/use-plugin.svg?branch=master
+[Coveralls]: https://coveralls.io/github/rjrodger/use-plugin?branch=master
+[Npm]: https://www.npmjs.com/package/use-plugin
+[Travis]: https://travis-ci.org/rjrodger/use-plugin?branch=master
