@@ -9,8 +9,6 @@ var util   = require('util')
 var assert = require('assert')
 
 
-var Use = require('../')
-
 var origin  = require('./origin')
 
 
@@ -23,6 +21,16 @@ describe('use', function() {
   })
 
 
+  // Ensures Seneca.use('repl') works for seneca-repl
+  it('prefix-repl', function(fin) {
+    var usep = origin.makeuse({prefix:'p-'})
+    var repl = usep('repl')
+    assert.equal('repl',repl.name)
+    assert.equal('repl',repl.init())
+    fin()
+  })
+
+  
   it('clientlib0', function() {
     var client0 = require('./lib0/client0')
     var p0 = client0('p0')
@@ -137,7 +145,7 @@ describe('use', function() {
 
 
   it('intern-make_system_modules', function(fin) {
-    assert(Use.intern.make_system_modules().length > 0)
+    assert(origin.makeuse.intern.make_system_modules().length > 0)
     fin()
   })
   
