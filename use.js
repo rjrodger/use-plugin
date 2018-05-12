@@ -349,7 +349,7 @@ function build_plugin_names() {
   // because the plugin is an npm module
   // in the code calling the framework.
   // You can't load node system modules as plugins, however.
-  if (!system_modules.includes(name)) {
+  if (-1 === system_modules.indexOf(name)) {
     plugin_names.push({ type: 'normal', name: name })
   }
 
