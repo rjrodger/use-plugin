@@ -1,18 +1,12 @@
-/* Copyright (c) 2014-2015 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2018 Richard Rodger, MIT License */
 'use strict'
-/* jshint node:true, asi:true, eqnull:true */
 
 // Generic plugin loader functionality for Node.js frameworks.
 
-// #### System modules
-var path = require('path')
-var util = require('util')
-
 // #### External modules
-var _ = require('lodash')
-var nid = require('nid')
-var norma = require('norma')
-var make_eraro = require('eraro')
+var Nid = require('nid')
+var Norma = require('norma')
+var Eraro = require('eraro')
 
 // #### Exports
 module.exports = make
@@ -27,7 +21,7 @@ module.exports = make
 //      * _errmsgprefix_ : (optional, default: true) String or Boolean; error message prefix for [eraro](http://github.com/rjrodger/eraro) module, used by this module to generate error messages
 function make(useopts) {
   // Default options, overidden by caller supplied options.
-  useopts = _.extend(
+  useopts = Object.assign(
     {
       prefix: 'plugin-',
       builtin: '../plugin/',
@@ -39,7 +33,7 @@ function make(useopts) {
   )
 
   // Setup error messages, see msgmap function below for text.
-  var eraro = make_eraro({
+  var eraro = Eraro({
     package: 'use-plugin',
     msgmap: msgmap(),
     module: module,
@@ -69,7 +63,7 @@ function make(useopts) {
   //   * _tag_ : String; the tag value of the plugin name (format: name$tag), if any, allows loading of same plugin multiple times
   //   * _err_ : Error; plugin load error, if any
   function use() {
-    var args = norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
+    var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
 
     var plugindesc = build_plugindesc(args, useopts, eraro)
 
@@ -83,13 +77,13 @@ function make(useopts) {
     // The init function may already be defined.
     // If it isn't, try to load it using _require_ over
     // the search paths and module ancestry.
-    if (!_.isFunction(plugindesc.init)) {
+    if ('function' !== typeof(plugindesc.init)) {
       loadplugin(plugindesc, useopts.module, eraro)
     }
 
     // No init function found, require found nothing, so throw error.
-    if (!_.isFunction(plugindesc.init)) {
-      plugindesc.searchlist = _.map(plugindesc.search, function(s) {
+    if ('function' !== typeof(plugindesc.init)) {
+      plugindesc.searchlist = plugindesc.search.map(function(s) {
         return s.name
       }).join(', ')
       throw eraro('not_found', plugindesc)
@@ -107,7 +101,7 @@ function build_plugindesc(spec, useopts, eraro) {
 
   // Don't do much with plugin options, just ensure they are an object.
   var options = null == spec.options ? {} : spec.options
-  options = _.isObject(options) ? options : { value$: options }
+  options = 'object' === typeof(options) ? options : { value$: options }
 
   // Start building the return value.
   var plugindesc = {
@@ -118,42 +112,42 @@ function build_plugindesc(spec, useopts, eraro) {
 
   // The most common case, where the plugin is
   // specified as a string name to be required in.
-  if (_.isString(plugin)) {
+  if ('string' === typeof(plugin)) {
     plugindesc.name = plugin
   }
 
   // Define the plugin with a function, most often used for small,
   // on-the-fly plugins.
-  else if (_.isFunction(plugin)) {
-    if (_.isString(plugin.name) && '' !== plugin.name) {
+  else if ('function' === typeof(plugin)) {
+    if ('string' === typeof(plugin.name) && '' !== plugin.name) {
       plugindesc.name = plugin.name
     }
 
     // The function has no name, so generate a name for the plugin
     else {
-      var prefix = _.isArray(useopts.prefix)
+      var prefix = Array.isArray(useopts.prefix)
         ? useopts.prefix[0]
         : useopts.prefix
-      plugindesc.name = prefix + nid()
+      plugindesc.name = prefix + Nid()
     }
 
     plugindesc.init = plugin
   }
 
   // Provide some or all of plugin definition directly.
-  else if (_.isObject(plugin)) {
-    plugindesc = _.extend({}, plugin, plugindesc)
+  else if ('object' === typeof(plugin)) {
+    plugindesc = Object.assign({}, plugin, plugindesc)
 
-    if (!_.isString(plugindesc.name)) throw eraro('no_name', { plugin: plugin })
+    if ('string' !== typeof(plugindesc.name)) throw eraro('no_name', { plugin: plugin })
 
-    if (null != plugindesc.init && !_.isFunction(plugindesc.init)) {
+    if (null != plugindesc.init && 'function' !== typeof(plugindesc.init)) {
       throw eraro('no_init_function', { name: plugindesc.name, plugin: plugin })
     }
   }
 
   // Options as an argument to the _use_ function override options
   // in the plugin description object.
-  plugindesc.options = _.extend(plugindesc.options || {}, options || {})
+  plugindesc.options = Object.assign(plugindesc.options || {}, options || {})
 
   // Plugins can be tagged.
   // The tag can be embedded inside the name using a $ separator: _name$tag_.
@@ -261,7 +255,7 @@ function handle_load_error(err, found, plugindesc, eraro) {
 function make_reqfunc(module) {
   if (null == module) return null
 
-  var reqfunc = _.bind(module.require, module)
+  var reqfunc = module.require.bind(module)
   reqfunc.module = module.id
   return reqfunc
 }
@@ -314,18 +308,18 @@ function perform_require(reqfunc, plugindesc, builtin, level) {
 // #### Create the list of require search locations
 // Searches are performed without the prefix first
 function build_plugin_names() {
-  var args = norma('{name:s, builtin:s|a?, prefix:s|a?, system:a?}', arguments)
+  var args = Norma('{name:s, builtin:s|a?, prefix:s|a?, system:a?}', arguments)
 
   var name = args.name
 
   var builtin_list = args.builtin
-    ? _.isArray(args.builtin)
+    ? Array.isArray(args.builtin)
       ? args.builtin
       : [args.builtin]
     : []
 
   var prefix_list = args.prefix
-    ? _.isArray(args.prefix)
+    ? Array.isArray(args.prefix)
       ? args.prefix
       : [args.prefix]
     : []
@@ -336,9 +330,9 @@ function build_plugin_names() {
 
   // Do the builtins first! But only for the framework module, see above.
   if (!name.match(/^[.\/]/)) {
-    _.each(builtin_list, function(builtin) {
+    builtin_list.forEach(function(builtin) {
       plugin_names.push({ type: 'builtin', name: builtin + name })
-      _.each(prefix_list, function(prefix) {
+      prefix_list.forEach(function(prefix) {
         plugin_names.push({ type: 'builtin', name: builtin + prefix + name })
       })
     })
@@ -349,19 +343,19 @@ function build_plugin_names() {
   // because the plugin is an npm module
   // in the code calling the framework.
   // You can't load node system modules as plugins, however.
-  if (-1 === system_modules.indexOf(name)) {
+  if (-1 == system_modules.indexOf(name)) {
     plugin_names.push({ type: 'normal', name: name })
   }
 
   // Try the prefix next.
-  _.each(prefix_list, function(prefix) {
+  prefix_list.forEach(function(prefix) {
     plugin_names.push({ type: 'normal', name: prefix + name })
   })
 
   // OK, probably not an npm module, try locally.
   plugin_names.push({ type: 'normal', name: './' + name })
 
-  _.each(prefix_list, function(prefix) {
+  prefix_list.forEach(function(prefix) {
     plugin_names.push({ type: 'normal', name: './' + prefix + name })
   })
 

@@ -85,7 +85,9 @@ value can be any of string, function or object, to which the same
 rules apply. In particular, you need to explicitly provide a _name_
 property if you want an explicit name.
 
-Note that plugins cannot have the same names as builtin Node.js modules.
+Note that plugins cannot have the same names as builtin Node.js
+modules. You can however change the list of builtin Node.js module
+names using the `system_modules` option.
 
 
 # Plugin Name Resolution
