@@ -6,8 +6,12 @@ node_js:
   - 8
   - 6
   - 4
-  
+
+install:
+  - node_version=$(node -v); if [ ${node_version:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm i; fi
+
 after_script:
   - node_version=$(node -v); if [ ${node_version:1:2} -ge 10 ]; then npm audit; fi
   - npm run coveralls
+
 
