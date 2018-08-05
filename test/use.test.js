@@ -4,14 +4,18 @@
 var Assert = require('assert')
 
 var Lab = require('lab')
+var Code = require('code')
 
 var Origin = require('./origin')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
 var it = lab.it
+var expect = Code.expect
 
 describe('use', function() {
+  // NOTE: does not work if run using `lab -P test -g plugin-desc`
+  // as module resolution fails
   it('happy', function(fin) {
     var p0 = Origin.use('p0')
     Assert.equal('p0', p0.name)
@@ -184,6 +188,24 @@ describe('use', function() {
 
       fin()
     }
+  })
+
+  // NOTE: does not work if run using `lab -P test -g plugin-desc`
+  // as module resolution fails
+  it('plugin-desc', function(fin) {
+    var p1 = Origin.use('p1')
+
+    expect(p1.name).equal('p1n')
+    expect(p1.init()).equal('p1x')
+    expect(p1.options).equal({ a: 1 })
+
+    fin()
+  })
+
+  it('frozen-options', function(fin) {
+    var f1 = Origin.use(function f1() {}, Object.freeze({ a: 1 }))
+    Assert.equal(f1.options.a, 1)
+    fin()
   })
 
   it('intern-make_system_modules', function(fin) {

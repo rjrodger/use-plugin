@@ -77,15 +77,17 @@ function make(useopts) {
     // The init function may already be defined.
     // If it isn't, try to load it using _require_ over
     // the search paths and module ancestry.
-    if ('function' !== typeof(plugindesc.init)) {
+    if ('function' !== typeof plugindesc.init) {
       loadplugin(plugindesc, useopts.module, eraro)
     }
 
     // No init function found, require found nothing, so throw error.
-    if ('function' !== typeof(plugindesc.init)) {
-      plugindesc.searchlist = plugindesc.search.map(function(s) {
-        return s.name
-      }).join(', ')
+    if ('function' !== typeof plugindesc.init) {
+      plugindesc.searchlist = plugindesc.search
+        .map(function(s) {
+          return s.name
+        })
+        .join(', ')
       throw eraro('not_found', plugindesc)
     }
 
@@ -101,7 +103,7 @@ function build_plugindesc(spec, useopts, eraro) {
 
   // Don't do much with plugin options, just ensure they are an object.
   var options = null == spec.options ? {} : spec.options
-  options = 'object' === typeof(options) ? options : { value$: options }
+  options = 'object' === typeof options ? options : { value$: options }
 
   // Start building the return value.
   var plugindesc = {
@@ -112,14 +114,14 @@ function build_plugindesc(spec, useopts, eraro) {
 
   // The most common case, where the plugin is
   // specified as a string name to be required in.
-  if ('string' === typeof(plugin)) {
+  if ('string' === typeof plugin) {
     plugindesc.name = plugin
   }
 
   // Define the plugin with a function, most often used for small,
   // on-the-fly plugins.
-  else if ('function' === typeof(plugin)) {
-    if ('string' === typeof(plugin.name) && '' !== plugin.name) {
+  else if ('function' === typeof plugin) {
+    if ('string' === typeof plugin.name && '' !== plugin.name) {
       plugindesc.name = plugin.name
     }
 
@@ -135,19 +137,24 @@ function build_plugindesc(spec, useopts, eraro) {
   }
 
   // Provide some or all of plugin definition directly.
-  else if ('object' === typeof(plugin)) {
+  else if ('object' === typeof plugin) {
     plugindesc = Object.assign({}, plugin, plugindesc)
 
-    if ('string' !== typeof(plugindesc.name)) throw eraro('no_name', { plugin: plugin })
+    if ('string' !== typeof plugindesc.name)
+      throw eraro('no_name', { plugin: plugin })
 
-    if (null != plugindesc.init && 'function' !== typeof(plugindesc.init)) {
+    if (null != plugindesc.init && 'function' !== typeof plugindesc.init) {
       throw eraro('no_init_function', { name: plugindesc.name, plugin: plugin })
     }
   }
 
   // Options as an argument to the _use_ function override options
   // in the plugin description object.
-  plugindesc.options = Object.assign(plugindesc.options || {}, options || {})
+  plugindesc.options = Object.assign(
+    {},
+    plugindesc.options || {},
+    options || {}
+  )
 
   // Plugins can be tagged.
   // The tag can be embedded inside the name using a $ separator: _name$tag_.
@@ -216,8 +223,15 @@ function loadplugin(plugindesc, start_module, eraro) {
     plugindesc.name = funcdesc.initfunc.name
   }
 
-  // Success! We have an init function!
   plugindesc.init = funcdesc.initfunc
+
+  // Init function can also provide options
+  if (plugindesc.init && 'object' === typeof plugindesc.init.options) {
+    plugindesc.options = Object.assign(
+      plugindesc.options,
+      plugindesc.init.options
+    )
+  }
 }
 
 // #### The require that loads a plugin can fail
