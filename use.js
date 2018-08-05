@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2018 Richard Rodger, MIT License */
+/* Copyright © 2014-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 // Generic plugin loader functionality for Node.js frameworks.
@@ -48,7 +48,7 @@ function make(useopts) {
   //      * if Object: provide a partial or complete definition with same properties as return value
   //      * if Function: assumed to be plugin _init_ function; plugin name taken from function name, if defined
   //      * if String: base for _require_ search; assumes module defines an _init_ function
-  //   * _options_ : (Object, ...)plugin options; if not an object, constructs an object of form {value$:options}
+  //   * _options_ : (Object, ...); plugin options, if not an object, constructs an object of form {value$:options}
   //   * _callback_ : (Function); callback function, possibly to be called by framework after init function completes
   //
   // Returns: A plugin description object is returned, with properties:
