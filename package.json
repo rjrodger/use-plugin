@@ -21,9 +21,10 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "license": "MIT",
   "dependencies": {
+    "eraro": "1.0",
     "nid": "0.3",
     "norma": "0.4",
-    "eraro": "1.0"
+    "optioner": "2.1"
   },
   "devDependencies": {
     "coveralls": "3",

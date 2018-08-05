@@ -192,14 +192,33 @@ describe('use', function() {
 
   // NOTE: does not work if run using `lab -P test -g plugin-desc`
   // as module resolution fails
-  it('plugin-desc', function(fin) {
-    var p1 = Origin.use('p1')
+  it('basic-defaults', function(fin) {
+    var p1 = Origin.use('p1', { b: 2 })
 
     expect(p1.name).equal('p1n')
     expect(p1.init()).equal('p1x')
-    expect(p1.options).equal({ a: 1 })
+    expect(p1.defaults).equal({ a: 1 })
+    expect(p1.options).equal({ a: 1, b: 2 })
 
     fin()
+  })
+
+  it('option-fail', function(fin) {
+    try {
+      Origin.use(
+        {
+          name: 'p2',
+          init: function() {},
+          defaults: {
+            a: Origin.use.Joi.string()
+          }
+        },
+        { a: 1 }
+      )
+    } catch (e) {
+      expect(e.message).equals('child "a" fails because ["a" must be a string]')
+      fin()
+    }
   })
 
   it('frozen-options', function(fin) {

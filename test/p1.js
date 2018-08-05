@@ -1,5 +1,5 @@
 module.exports = p1n
-module.exports.options = {
+module.exports.defaults = {
   a: 1
 }
 

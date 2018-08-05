@@ -7,6 +7,7 @@
 var Nid = require('nid')
 var Norma = require('norma')
 var Eraro = require('eraro')
+var Optioner = require('optioner')
 
 // #### Exports
 module.exports = make
@@ -81,6 +82,12 @@ function make(useopts) {
       loadplugin(plugindesc, useopts.module, eraro)
     }
 
+    if ('object' === typeof plugindesc.defaults) {
+      plugindesc.options = Optioner(plugindesc.defaults).check(
+        plugindesc.options
+      )
+    }
+
     // No init function found, require found nothing, so throw error.
     if ('function' !== typeof plugindesc.init) {
       plugindesc.searchlist = plugindesc.search
@@ -93,6 +100,9 @@ function make(useopts) {
 
     return plugindesc
   }
+
+  use.Optioner = Optioner
+  use.Joi = Optioner.Joi
 
   return use
 }
@@ -226,11 +236,8 @@ function loadplugin(plugindesc, start_module, eraro) {
   plugindesc.init = funcdesc.initfunc
 
   // Init function can also provide options
-  if (plugindesc.init && 'object' === typeof plugindesc.init.options) {
-    plugindesc.options = Object.assign(
-      plugindesc.options,
-      plugindesc.init.options
-    )
+  if (plugindesc.init && 'object' === typeof plugindesc.init.defaults) {
+    plugindesc.defaults = Object.assign({}, plugindesc.init.defaults)
   }
 }
 
