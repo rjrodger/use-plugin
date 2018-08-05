@@ -1,10 +1,10 @@
 {
   "name": "use-plugin",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
-    "test": "lab -v test/use.test.js -t 85 -I SharedArrayBuffer,Atomics,URL,URLSearchParams",
+    "test": "lab -v test/use.test.js -t 85 -I SharedArrayBuffer,Atomics,URL,URLSearchParams,BigUint64Array,BigInt64Array,BigInt",
     "coveralls": "lab -s test/use.test.js -r lcov | coveralls",
     "coverage": "lab -v test/use.test.js -t 85 -r html > coverage.html",
     "prettier": "prettier --write *.js lib/*.js test/*.js",
