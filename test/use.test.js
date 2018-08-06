@@ -32,6 +32,16 @@ describe('use', function() {
     fin()
   })
 
+  it('prefix-edges', function(fin) {
+    var usep = Origin.makeuse({ prefix: 'a-' })
+    expect(usep(function() {}).name).startsWith('a-')
+
+    usep = Origin.makeuse({ prefix: ['aa-', 'bb-'] })
+    expect(usep(function() {}).name).startsWith('aa-')
+
+    fin()
+  })
+
   it('clientlib0', function(fin) {
     var client0 = require('./lib0/client0')
     var p0 = client0('p0')
@@ -200,6 +210,34 @@ describe('use', function() {
     expect(p1.defaults).equal({ a: 1 })
     expect(p1.options).equal({ a: 1, b: 2 })
 
+    var p2 = Origin.use(
+      {
+        name: 'p2n',
+        init: function() {
+          return 'p2x'
+        },
+        defaults: {
+          a: Origin.use.Joi.string().default('A'),
+          b: 2,
+          c: true,
+          d: { e: 3 },
+          f: { g: 4 }
+        }
+      },
+      { c: false, f: { h: 5 } }
+    )
+
+    expect(p2.name).equal('p2n')
+    expect(p2.init()).equal('p2x')
+    expect(p2.defaults).contains({ b: 2, c: true, d: { e: 3 }, f: { g: 4 } })
+    expect(p2.options).equal({
+      c: false,
+      f: { h: 5, g: 4 },
+      a: 'A',
+      b: 2,
+      d: { e: 3 }
+    })
+
     fin()
   })
 
@@ -215,8 +253,12 @@ describe('use', function() {
         },
         { a: 1 }
       )
+      Code.fail()
     } catch (e) {
-      expect(e.message).equals('child "a" fails because ["a" must be a string]')
+      expect(e.code).equals('invalid_option')
+      expect(e.message).equals(
+        'use-plugin: Plugin p2: option value is not valid: child "a" fails because ["a" must be a string] in options { a: 1 }'
+      )
       fin()
     }
   })
@@ -224,6 +266,55 @@ describe('use', function() {
   it('frozen-options', function(fin) {
     var f1 = Origin.use(function f1() {}, Object.freeze({ a: 1 }))
     Assert.equal(f1.options.a, 1)
+    fin()
+  })
+
+  it('edges', function(fin) {
+    try {
+      Origin.use()
+      Code.fail()
+    } catch (e) {
+      expect(e.code).equals('invalid_arguments')
+    }
+
+    try {
+      Origin.use({})
+      Code.fail()
+    } catch (e) {
+      expect(e.code).equals('no_name')
+    }
+
+    try {
+      Origin.use({ name: 'p1', init: 'a' })
+      Code.fail()
+    } catch (e) {
+      expect(e.code).equals('no_init_function')
+    }
+
+    try {
+      Origin.use({ name: 'n1', init: null })
+      Code.fail()
+    } catch (e) {
+      expect(e.code).equals('not_found')
+    }
+
+    try {
+      Origin.use({ name: 'bad-require/br5.js', init: null })
+      Code.fail()
+    } catch (e) {
+      expect(e.code).equals('syntax_error')
+    }
+
+    try {
+      Origin.use('bad1')
+      Code.fail()
+    } catch (e) {
+      expect(e.code).equals('not_found')
+    }
+
+    var n1 = Origin.use({ name: 'n1', init: function() {} }, null)
+    expect(n1.options).equal({})
+
     fin()
   })
 

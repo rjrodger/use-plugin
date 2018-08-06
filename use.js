@@ -66,10 +66,10 @@ function make(useopts) {
   function use() {
     var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
 
-    var plugindesc = build_plugindesc(args, useopts, eraro)
+    var plugin_desc = build_plugin_desc(args, useopts, eraro)
 
-    plugindesc.search = build_plugin_names(
-      plugindesc.name,
+    plugin_desc.search = build_plugin_names(
+      plugin_desc.name,
       useopts.builtin,
       useopts.prefix,
       useopts.system_modules
@@ -78,27 +78,35 @@ function make(useopts) {
     // The init function may already be defined.
     // If it isn't, try to load it using _require_ over
     // the search paths and module ancestry.
-    if ('function' !== typeof plugindesc.init) {
-      loadplugin(plugindesc, useopts.module, eraro)
+    if ('function' !== typeof plugin_desc.init) {
+      load_plugin(plugin_desc, useopts.module, eraro)
     }
 
-    if ('object' === typeof plugindesc.defaults) {
-      plugindesc.options = Optioner(plugindesc.defaults).check(
-        plugindesc.options
-      )
+    if ('object' === typeof plugin_desc.defaults) {
+      try {
+        plugin_desc.options = Optioner(plugin_desc.defaults).check(
+          plugin_desc.options
+        )
+      } catch (e) {
+        throw eraro('invalid_option', {
+          name: plugin_desc.name,
+          err_msg: e.message,
+          options: plugin_desc.options
+        })
+      }
     }
 
     // No init function found, require found nothing, so throw error.
-    if ('function' !== typeof plugindesc.init) {
-      plugindesc.searchlist = plugindesc.search
+    if ('function' !== typeof plugin_desc.init) {
+      plugin_desc.searchlist = plugin_desc.search
         .map(function(s) {
           return s.name
         })
         .join(', ')
-      throw eraro('not_found', plugindesc)
+      throw eraro('not_found', plugin_desc)
     }
 
-    return plugindesc
+    return plugin_desc
   }
 
   use.Optioner = Optioner
@@ -108,7 +116,7 @@ function make(useopts) {
 }
 
 // #### Create description object for the plugin
-function build_plugindesc(spec, useopts, eraro) {
+function build_plugin_desc(spec, useopts, eraro) {
   var plugin = spec.plugin
 
   // Don't do much with plugin options, just ensure they are an object.
@@ -116,7 +124,7 @@ function build_plugindesc(spec, useopts, eraro) {
   options = 'object' === typeof options ? options : { value$: options }
 
   // Start building the return value.
-  var plugindesc = {
+  var plugin_desc = {
     options: options,
     callback: spec.callback,
     history: []
@@ -125,14 +133,14 @@ function build_plugindesc(spec, useopts, eraro) {
   // The most common case, where the plugin is
   // specified as a string name to be required in.
   if ('string' === typeof plugin) {
-    plugindesc.name = plugin
+    plugin_desc.name = plugin
   }
 
   // Define the plugin with a function, most often used for small,
   // on-the-fly plugins.
   else if ('function' === typeof plugin) {
-    if ('string' === typeof plugin.name && '' !== plugin.name) {
-      plugindesc.name = plugin.name
+    if ('' !== plugin.name) {
+      plugin_desc.name = plugin.name
     }
 
     // The function has no name, so generate a name for the plugin
@@ -140,47 +148,47 @@ function build_plugindesc(spec, useopts, eraro) {
       var prefix = Array.isArray(useopts.prefix)
         ? useopts.prefix[0]
         : useopts.prefix
-      plugindesc.name = prefix + Nid()
+      plugin_desc.name = prefix + Nid()
     }
 
-    plugindesc.init = plugin
+    plugin_desc.init = plugin
   }
 
   // Provide some or all of plugin definition directly.
   else if ('object' === typeof plugin) {
-    plugindesc = Object.assign({}, plugin, plugindesc)
+    plugin_desc = Object.assign({}, plugin, plugin_desc)
 
-    if ('string' !== typeof plugindesc.name)
+    if ('string' !== typeof plugin_desc.name)
       throw eraro('no_name', { plugin: plugin })
 
-    if (null != plugindesc.init && 'function' !== typeof plugindesc.init) {
-      throw eraro('no_init_function', { name: plugindesc.name, plugin: plugin })
+    if (null != plugin_desc.init && 'function' !== typeof plugin_desc.init) {
+      throw eraro('no_init_function', { name: plugin_desc.name, plugin: plugin })
     }
   }
 
   // Options as an argument to the _use_ function override options
   // in the plugin description object.
-  plugindesc.options = Object.assign(
+  plugin_desc.options = Object.assign(
     {},
-    plugindesc.options || {},
+    plugin_desc.options || {},
     options || {}
   )
 
   // Plugins can be tagged.
   // The tag can be embedded inside the name using a $ separator: _name$tag_.
   // Note: the $tag suffix is NOT considered part of the file name!
-  var m = /^(.+)\$(.+)$/.exec(plugindesc.name)
+  var m = /^(.+)\$(.+)$/.exec(plugin_desc.name)
   if (m) {
-    plugindesc.name = m[1]
-    plugindesc.tag = m[2]
+    plugin_desc.name = m[1]
+    plugin_desc.tag = m[2]
   }
 
   // Plugins must have a name.
-  if (!plugindesc.name) {
-    throw eraro('no_name', plugindesc)
+  if (!plugin_desc.name) {
+    throw eraro('no_name', plugin_desc)
   }
 
-  return plugindesc
+  return plugin_desc
 }
 
 // #### Attempt to load the plugin
@@ -191,9 +199,9 @@ function build_plugindesc(spec, useopts, eraro) {
 //     3.     PERFORM require ON search-entry.name
 //     4.     IF FOUND BREAK
 //     5.     IF ERROR THROW # construct contextual info
-//     6.   IF FOUND update plugindesc, BREAK
+//     6.   IF FOUND update plugin_desc, BREAK
 //     7.   IF NOT FOUND module = module.parent
-function loadplugin(plugindesc, start_module, eraro) {
+function load_plugin(plugin_desc, start_module, eraro) {
   var current_module = start_module
   var builtin = true
   var level = 0
@@ -205,10 +213,10 @@ function loadplugin(plugindesc, start_module, eraro) {
     null == funcdesc.initfunc &&
     (reqfunc = make_reqfunc(current_module))
   ) {
-    funcdesc = perform_require(reqfunc, plugindesc, builtin, level)
+    funcdesc = perform_require(reqfunc, plugin_desc, builtin, level)
 
     if (funcdesc.error)
-      throw handle_load_error(funcdesc.error, funcdesc.found, plugindesc, eraro)
+      throw handle_load_error(funcdesc.error, funcdesc.found, plugin_desc, eraro)
 
     builtin = false
     level++
@@ -217,9 +225,9 @@ function loadplugin(plugindesc, start_module, eraro) {
 
   // Record the details of where we found the plugin.
   // This is useful for debugging, especially if the "wrong" plugin is loaded.
-  plugindesc.modulepath = funcdesc.module
-  plugindesc.requirepath = funcdesc.require
-  plugindesc.found = funcdesc.found
+  plugin_desc.modulepath = funcdesc.module
+  plugin_desc.requirepath = funcdesc.require
+  plugin_desc.found = funcdesc.found
 
   // The function name of the initfunc, if defined,
   // sets the final name of the plugin.
@@ -230,45 +238,45 @@ function loadplugin(plugindesc, start_module, eraro) {
     null != funcdesc.initfunc.name &&
     '' !== funcdesc.initfunc.name
   ) {
-    plugindesc.name = funcdesc.initfunc.name
+    plugin_desc.name = funcdesc.initfunc.name
   }
 
-  plugindesc.init = funcdesc.initfunc
+  plugin_desc.init = funcdesc.initfunc
 
   // Init function can also provide options
-  if (plugindesc.init && 'object' === typeof plugindesc.init.defaults) {
-    plugindesc.defaults = Object.assign({}, plugindesc.init.defaults)
+  if (plugin_desc.init && 'object' === typeof plugin_desc.init.defaults) {
+    plugin_desc.defaults = Object.assign({}, plugin_desc.init.defaults)
   }
 }
 
 // #### The require that loads a plugin can fail
 // This code deals with the known failure cases.
-function handle_load_error(err, found, plugindesc, eraro) {
-  plugindesc.err = err
-  plugindesc.found = found
+function handle_load_error(err, found, plugin_desc, eraro) {
+  plugin_desc.err = err
+  plugin_desc.found = found
 
-  plugindesc.found_name = plugindesc.found.name
-  plugindesc.err_msg = err.message
+  plugin_desc.found_name = plugin_desc.found.name
+  plugin_desc.err_msg = err.message
 
   // Syntax error inside the plugin code.
   // Unfortunately V8 does not give us location info.
   // It does print a complaint to STDERR, so need to tell user to look there.
   if (err instanceof SyntaxError) {
-    return eraro('syntax_error', plugindesc)
+    return eraro('syntax_error', plugin_desc)
   }
 
   // Not what you think!
   // This covers the case where the plugin contains
   // _require_ calls that themselves fail.
   else if ('MODULE_NOT_FOUND' == err.code) {
-    plugindesc.err_msg = err.stack.replace(/\n.*\(module\.js\:.*/g, '')
-    plugindesc.err_msg = plugindesc.err_msg.replace(/\s+/g, ' ')
-    return eraro('require_failed', plugindesc)
+    plugin_desc.err_msg = err.stack.replace(/\n.*\(module\.js\:.*/g, '')
+    plugin_desc.err_msg = plugin_desc.err_msg.replace(/\s+/g, ' ')
+    return eraro('require_failed', plugin_desc)
   }
 
   // The require call failed for some other reason.
   else {
-    return eraro('load_failed', plugindesc)
+    return eraro('load_failed', plugin_desc)
   }
 }
 
@@ -282,8 +290,8 @@ function make_reqfunc(module) {
 }
 
 // #### Iterate over all the search items using the provided require function
-function perform_require(reqfunc, plugindesc, builtin, level) {
-  var search_list = plugindesc.search
+function perform_require(reqfunc, plugin_desc, builtin, level) {
+  var search_list = plugin_desc.search
   var initfunc, search
 
   next_search_entry: for (var i = 0; i < search_list.length; i++) {
@@ -296,7 +304,7 @@ function perform_require(reqfunc, plugindesc, builtin, level) {
       continue
 
     try {
-      plugindesc.history.push({ module: reqfunc.module, path: search.name })
+      plugin_desc.history.push({ module: reqfunc.module, path: search.name })
       initfunc = reqfunc(search.name)
 
       // Found it!
@@ -396,7 +404,9 @@ function msgmap() {
     no_init_function:
       'The init property is not a function for plugin <%=name%> defined by Object <%=plugin%>.',
     load_failed:
-      'Could not load plugin <%=name%> defined in <%=found_name%> due to error: <%=err_msg%>.'
+      'Could not load plugin <%=name%> defined in <%=found_name%> due to error: <%=err_msg%>.',
+    invalid_option:
+      'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>'
   }
 }
 
