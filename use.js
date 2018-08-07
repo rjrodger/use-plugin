@@ -11,6 +11,7 @@ var Optioner = require('optioner')
 
 // #### Exports
 module.exports = make
+module.exports.Joi = Optioner.Joi
 
 // #### Create a _use_ function
 // Parameters:
