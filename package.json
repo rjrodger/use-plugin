@@ -24,7 +24,7 @@
     "eraro": "1.0",
     "nid": "0.3",
     "norma": "0.4",
-    "optioner": "2.1"
+    "optioner": "3.0"
   },
   "devDependencies": {
     "coveralls": "3",
@@ -38,6 +38,6 @@
     "use.js"
   ],
   "engines": {
-    "node": ">=6"
+    "node": ">=4"
   }
 }
