@@ -83,11 +83,18 @@ function make(useopts) {
       load_plugin(plugin_desc, useopts.module, eraro)
     }
 
-    if ('object' === typeof plugin_desc.defaults) {
+    var defaults = Object.assign(
+      {},
+      plugin_desc.defaults,
+      (plugin_desc.init && plugin_desc.init.defaults))
+
+    plugin_desc.defaults = defaults
+    
+    if ('object' === typeof defaults) {
       try {
-        plugin_desc.options = Optioner(plugin_desc.defaults).check(
-          plugin_desc.options
-        )
+        plugin_desc.options =
+          Optioner(defaults, {allow_unknown: true})
+          .check(plugin_desc.options)
       } catch (e) {
         throw eraro('invalid_option', {
           name: plugin_desc.name,

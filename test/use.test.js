@@ -238,6 +238,18 @@ describe('use', function() {
       d: { e: 3 }
     })
 
+
+    var p3f = function p3n() { return 'p3x' }
+    p3f.defaults = {a: 1}
+
+    var p3 = Origin.use(p3f, {b: 2})
+    expect(p3.name).equal('p3n')
+    expect(p3.init()).equal('p3x')
+    expect(p3.defaults).contains({ a: 1 })
+    expect(p3.options).equal({
+      a: 1, b: 2
+    })
+
     fin()
   })
 
