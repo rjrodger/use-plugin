@@ -66,62 +66,77 @@ function make(useopts) {
   //   * _err_ : Error; plugin load error, if any
   function use() {
     var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
-
-    var plugin_desc = build_plugin_desc(args, useopts, eraro)
-
-    plugin_desc.search = build_plugin_names(
-      plugin_desc.name,
-      useopts.builtin,
-      useopts.prefix,
-      useopts.system_modules
-    )
-
-    // The init function may already be defined.
-    // If it isn't, try to load it using _require_ over
-    // the search paths and module ancestry.
-    if ('function' !== typeof plugin_desc.init) {
-      load_plugin(plugin_desc, useopts.module, eraro)
-    }
-
-    var defaults = Object.assign(
-      {},
-      plugin_desc.defaults,
-      (plugin_desc.init && plugin_desc.init.defaults))
-
-    plugin_desc.defaults = defaults
-    
-    if ('object' === typeof defaults) {
-      try {
-        plugin_desc.options =
-          Optioner(defaults, {allow_unknown: true})
-          .check(plugin_desc.options)
-      } catch (e) {
-        throw eraro('invalid_option', {
-          name: plugin_desc.name,
-          err_msg: e.message,
-          options: plugin_desc.options
-        })
-      }
-    }
-
-    // No init function found, require found nothing, so throw error.
-    if ('function' !== typeof plugin_desc.init) {
-      plugin_desc.searchlist = plugin_desc.search
-        .map(function(s) {
-          return s.name
-        })
-        .join(', ')
-      throw eraro('not_found', plugin_desc)
-    }
-
-    return plugin_desc
+    return use_plugin_desc(build_plugin_desc(args, useopts, eraro), useopts, eraro)
   }
+
 
   use.Optioner = Optioner
   use.Joi = Optioner.Joi
 
+  use.use_plugin_desc = function(plugin_desc) {
+    return use_plugin_desc(plugin_desc, useopts, eraro)
+  }
+
+  use.build_plugin_desc = function() {
+    var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
+    return build_plugin_desc(args, useopts, eraro)
+  }
+
   return use
 }
+
+
+function use_plugin_desc(plugin_desc, useopts, eraro) {
+  
+  plugin_desc.search = build_plugin_names(
+    plugin_desc.name,
+    useopts.builtin,
+    useopts.prefix,
+    useopts.system_modules
+  )
+
+  // The init function may already be defined.
+  // If it isn't, try to load it using _require_ over
+  // the search paths and module ancestry.
+  if ('function' !== typeof plugin_desc.init) {
+    load_plugin(plugin_desc, useopts.module, eraro)
+  }
+
+  var defaults = Object.assign(
+    {},
+    plugin_desc.defaults,
+    (plugin_desc.init && plugin_desc.init.defaults))
+
+  plugin_desc.defaults = defaults
+  
+  if ('object' === typeof defaults) {
+    try {
+      plugin_desc.options =
+        Optioner(defaults, {allow_unknown: true})
+        .check(plugin_desc.options)
+    } catch (e) {
+      throw eraro('invalid_option', {
+        name: plugin_desc.name,
+        err_msg: e.message,
+        options: plugin_desc.options
+      })
+    }
+  }
+
+  // No init function found, require found nothing, so throw error.
+  if ('function' !== typeof plugin_desc.init) {
+    plugin_desc.searchlist = plugin_desc.search
+      .map(function(s) {
+        return s.name
+      })
+      .join(', ')
+    throw eraro('not_found', plugin_desc)
+  }
+
+  return plugin_desc
+}
+
+
 
 // #### Create description object for the plugin
 function build_plugin_desc(spec, useopts, eraro) {
@@ -185,6 +200,7 @@ function build_plugin_desc(spec, useopts, eraro) {
   // Plugins can be tagged.
   // The tag can be embedded inside the name using a $ separator: _name$tag_.
   // Note: the $tag suffix is NOT considered part of the file name!
+  plugin_desc.full = plugin_desc.name
   var m = /^(.+)\$(.+)$/.exec(plugin_desc.name)
   if (m) {
     plugin_desc.name = m[1]
