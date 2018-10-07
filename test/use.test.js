@@ -253,6 +253,35 @@ describe('use', function() {
     fin()
   })
 
+  it('no-merge-defaults', function(fin) {
+    var use_nm = Origin.makeuse({ merge_defaults: false })
+
+    // options are not merged
+    var p0 = use_nm({
+      name: 'p0',
+      init: function () {},
+      defaults: { a: 1, c: 4 },
+      options: { a: 2, b: 3 }
+    })
+
+    expect(p0.defaults).equal({ a: 1, c: 4 })
+    expect(p0.options).equal({ a: 2, b: 3 })
+
+
+    // options are merged
+    var p1 = Origin.use({
+      name: 'p1',
+      init: function () {},
+      defaults: { a: 1, c: 4 },
+      options: { a: 2, b: 3 }
+    })
+
+    expect(p1.defaults).equal({ a: 1, c: 4 })
+    expect(p1.options).equal({ a: 2, b: 3, c: 4 })
+
+    fin()
+  })
+  
   it('option-fail', function(fin) {
     try {
       Origin.use(

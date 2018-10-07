@@ -29,7 +29,8 @@ function make(useopts) {
       builtin: '../plugin/',
       module: module.parent,
       errmsgprefix: true,
-      system_modules: intern.make_system_modules()
+      system_modules: intern.make_system_modules(),
+      merge_defaults: true
     },
     useopts
   )
@@ -109,7 +110,7 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   plugin_desc.defaults = defaults
   
-  if ('object' === typeof defaults) {
+  if (useopts.merge_defaults && 'object' === typeof defaults) {
     try {
       plugin_desc.options =
         Optioner(defaults, {allow_unknown: true})
@@ -143,7 +144,9 @@ function build_plugin_desc(spec, useopts, eraro) {
   var plugin = spec.plugin
 
   // Don't do much with plugin options, just ensure they are an object.
-  var options = null == spec.options ? {} : spec.options
+  var options = null == spec.options ?
+      (null == plugin.options ? {} : plugin.options) :
+      spec.options
   options = 'object' === typeof options ? options : { value$: options }
 
   // Start building the return value.
