@@ -118,6 +118,7 @@ describe('use', function() {
     )
     Assert.equal('f3', f3tc.name)
     Assert.equal('t1', f3tc.tag)
+    Assert.equal('f3$t1', f3tc.full)
     Assert.ok('function' == typeof f3tc.callback)
     Assert.equal('f3tcr', f3tc.init())
     Assert.equal('f3tck', f3tc.callback())
@@ -161,10 +162,6 @@ describe('use', function() {
       Assert.fail()
     } catch (e) {
       Assert.equal('not_found', e.code)
-      Assert.equal(
-        'use-plugin: Could not load plugin not-a-plugin; require search list: ../plugin/not-a-plugin, ../plugin/plugin-not-a-plugin, not-a-plugin, plugin-not-a-plugin, ./not-a-plugin, ./plugin-not-a-plugin.',
-        e.message
-      )
     }
 
     var a = use({
@@ -179,6 +176,16 @@ describe('use', function() {
     var p0 = use({ name: 'p0' })
     Assert.equal('p0', p0.name)
 
+    var b = use({
+      name: 'b',
+      tag: '0',
+      init: function() {}
+    })
+
+    Assert.equal('b', b.name)
+    Assert.equal('0', b.tag)
+    Assert.equal('b$0', b.full)
+ 
     fin()
   })
 
@@ -190,10 +197,6 @@ describe('use', function() {
       Assert.fail()
     } catch (e) {
       Assert.equal(e.code, 'not_found')
-      Assert.equal(
-        e.message,
-        'use-plugin: Could not load plugin not-a-plugin; require search list: ../plugin/not-a-plugin, ../plugin/plugin-not-a-plugin, not-a-plugin, plugin-not-a-plugin, ./not-a-plugin, ./plugin-not-a-plugin.'
-      )
       Assert.equal(e.details.name, 'not-a-plugin')
 
       fin()

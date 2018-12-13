@@ -1,6 +1,9 @@
 /* Copyright © 2014-2018 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
+var Path = require('path')
+var Util = require('util')
+
 // Generic plugin loader functionality for Node.js frameworks.
 
 // #### External modules
@@ -127,11 +130,26 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   // No init function found, require found nothing, so throw error.
   if ('function' !== typeof plugin_desc.init) {
-    plugin_desc.searchlist = plugin_desc.search
-      .map(function(s) {
-        return s.name
+
+    var foldermap = {}
+    for(var i = 0; i < plugin_desc.history.length; i++) {
+      var item = plugin_desc.history[i]
+      var folder = Path.dirname(item.module)
+      foldermap[folder] = foldermap[folder] || []
+      foldermap[folder].push(item.path)
+    }
+
+    var b = []
+    Object.keys(foldermap).forEach(function(folder) {
+      b.push('[ '+Path.resolve(folder)+': ')
+      foldermap[folder].forEach(function(path) {
+        b.push(path+', ')
       })
-      .join(', ')
+      b.push(' ] ')
+    })
+
+    plugin_desc.searchlist = b.join('')
+    
     throw eraro('not_found', plugin_desc)
   }
 
@@ -204,12 +222,15 @@ function build_plugin_desc(spec, useopts, eraro) {
   // Plugins can be tagged.
   // The tag can be embedded inside the name using a $ separator: _name$tag_.
   // Note: the $tag suffix is NOT considered part of the file name!
-  plugin_desc.full = plugin_desc.name
+
   var m = /^(.+)\$(.+)$/.exec(plugin_desc.name)
   if (m) {
     plugin_desc.name = m[1]
     plugin_desc.tag = m[2]
   }
+
+  plugin_desc.full = plugin_desc.name +
+    ((null == plugin_desc.tag || '' == plugin_desc.tag) ? '' : '$' + plugin_desc.tag)
 
   // Plugins must have a name.
   if (!plugin_desc.name) {
@@ -333,6 +354,9 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 
     try {
       plugin_desc.history.push({ module: reqfunc.module, path: search.name })
+
+      //console.log(reqfunc.module, search)
+
       initfunc = reqfunc(search.name)
 
       // Found it!
@@ -415,7 +439,7 @@ function build_plugin_names() {
   prefix_list.forEach(function(prefix) {
     plugin_names.push({ type: 'normal', name: './' + prefix + name })
   })
-
+  
   return plugin_names
 }
 
@@ -425,7 +449,7 @@ function msgmap() {
     syntax_error:
       'Could not load plugin <%=name%> defined in <%=found_name%> due to syntax error: <%=err_msg%>. See STDERR for details.',
     not_found:
-      'Could not load plugin <%=name%>; require search list: <%=searchlist%>.',
+      'Could not load plugin <%=name%>; searched the following folder and file paths: <%=searchlist%>.',
     require_failed:
       'Could not load plugin <%=name%> defined in <%=found_name%> as a require call inside the plugin (or a module required by the plugin) failed: <%=err_msg%>.',
     no_name: 'No name property found for plugin defined by Object <%=plugin%>.',
