@@ -185,7 +185,7 @@ describe('use', function() {
     Assert.equal('b', b.name)
     Assert.equal('0', b.tag)
     Assert.equal('b$0', b.full)
- 
+
     fin()
   })
 
@@ -241,16 +241,18 @@ describe('use', function() {
       d: { e: 3 }
     })
 
+    var p3f = function p3n() {
+      return 'p3x'
+    }
+    p3f.defaults = { a: 1 }
 
-    var p3f = function p3n() { return 'p3x' }
-    p3f.defaults = {a: 1}
-
-    var p3 = Origin.use(p3f, {b: 2})
+    var p3 = Origin.use(p3f, { b: 2 })
     expect(p3.name).equal('p3n')
     expect(p3.init()).equal('p3x')
     expect(p3.defaults).contains({ a: 1 })
     expect(p3.options).equal({
-      a: 1, b: 2
+      a: 1,
+      b: 2
     })
 
     fin()
@@ -262,7 +264,7 @@ describe('use', function() {
     // options are not merged
     var p0 = use_nm({
       name: 'p0',
-      init: function () {},
+      init: function() {},
       defaults: { a: 1, c: 4 },
       options: { a: 2, b: 3 }
     })
@@ -270,11 +272,10 @@ describe('use', function() {
     expect(p0.defaults).equal({ a: 1, c: 4 })
     expect(p0.options).equal({ a: 2, b: 3 })
 
-
     // options are merged
     var p1 = Origin.use({
       name: 'p1',
-      init: function () {},
+      init: function() {},
       defaults: { a: 1, c: 4 },
       options: { a: 2, b: 3 }
     })
@@ -284,7 +285,7 @@ describe('use', function() {
 
     fin()
   })
-  
+
   it('option-fail', function(fin) {
     try {
       Origin.use(

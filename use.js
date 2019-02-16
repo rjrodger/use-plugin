@@ -3,7 +3,7 @@
 
 var Path = require('path')
 var Util = require('util')
-var Module = require("module")
+var Module = require('module')
 
 // Generic plugin loader functionality for Node.js frameworks.
 
@@ -72,9 +72,12 @@ function make(useopts) {
   //   * _err_ : Error; plugin load error, if any
   function use() {
     var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
-    return use_plugin_desc(build_plugin_desc(args, useopts, eraro), useopts, eraro)
+    return use_plugin_desc(
+      build_plugin_desc(args, useopts, eraro),
+      useopts,
+      eraro
+    )
   }
-
 
   use.Optioner = Optioner
   use.Joi = Optioner.Joi
@@ -91,9 +94,7 @@ function make(useopts) {
   return use
 }
 
-
 function use_plugin_desc(plugin_desc, useopts, eraro) {
-  
   plugin_desc.search = build_plugin_names(
     plugin_desc.name,
     useopts.builtin,
@@ -111,15 +112,16 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
   var defaults = Object.assign(
     {},
     plugin_desc.defaults,
-    (plugin_desc.init && plugin_desc.init.defaults))
+    plugin_desc.init && plugin_desc.init.defaults
+  )
 
   plugin_desc.defaults = defaults
-  
+
   if (useopts.merge_defaults && 'object' === typeof defaults) {
     try {
-      plugin_desc.options =
-        Optioner(defaults, {allow_unknown: true})
-        .check(plugin_desc.options)
+      plugin_desc.options = Optioner(defaults, { allow_unknown: true }).check(
+        plugin_desc.options
+      )
     } catch (e) {
       throw eraro('invalid_option', {
         name: plugin_desc.name,
@@ -131,9 +133,8 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   // No init function found, require found nothing, so throw error.
   if ('function' !== typeof plugin_desc.init) {
-
     var foldermap = {}
-    for(var i = 0; i < plugin_desc.history.length; i++) {
+    for (var i = 0; i < plugin_desc.history.length; i++) {
       var item = plugin_desc.history[i]
       var folder = Path.dirname(item.module)
       foldermap[folder] = foldermap[folder] || []
@@ -142,31 +143,32 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
     var b = []
     Object.keys(foldermap).forEach(function(folder) {
-      b.push('[ '+Path.resolve(folder)+': ')
+      b.push('[ ' + Path.resolve(folder) + ': ')
       foldermap[folder].forEach(function(path) {
-        b.push(path+', ')
+        b.push(path + ', ')
       })
       b.push(' ] ')
     })
 
     plugin_desc.searchlist = b.join('')
-    
+
     throw eraro('not_found', plugin_desc)
   }
 
   return plugin_desc
 }
 
-
-
 // #### Create description object for the plugin
 function build_plugin_desc(spec, useopts, eraro) {
   var plugin = spec.plugin
 
   // Don't do much with plugin options, just ensure they are an object.
-  var options = null == spec.options ?
-      (null == plugin.options ? {} : plugin.options) :
-      spec.options
+  var options =
+    null == spec.options
+      ? null == plugin.options
+        ? {}
+        : plugin.options
+      : spec.options
   options = 'object' === typeof options ? options : { value$: options }
 
   // Start building the return value.
@@ -208,7 +210,10 @@ function build_plugin_desc(spec, useopts, eraro) {
       throw eraro('no_name', { plugin: plugin })
 
     if (null != plugin_desc.init && 'function' !== typeof plugin_desc.init) {
-      throw eraro('no_init_function', { name: plugin_desc.name, plugin: plugin })
+      throw eraro('no_init_function', {
+        name: plugin_desc.name,
+        plugin: plugin
+      })
     }
   }
 
@@ -230,8 +235,11 @@ function build_plugin_desc(spec, useopts, eraro) {
     plugin_desc.tag = m[2]
   }
 
-  plugin_desc.full = plugin_desc.name +
-    ((null == plugin_desc.tag || '' == plugin_desc.tag) ? '' : '$' + plugin_desc.tag)
+  plugin_desc.full =
+    plugin_desc.name +
+    (null == plugin_desc.tag || '' == plugin_desc.tag
+      ? ''
+      : '$' + plugin_desc.tag)
 
   // Plugins must have a name.
   if (!plugin_desc.name) {
@@ -266,7 +274,12 @@ function load_plugin(plugin_desc, start_module, eraro) {
     funcdesc = perform_require(reqfunc, plugin_desc, builtin, level)
 
     if (funcdesc.error)
-      throw handle_load_error(funcdesc.error, funcdesc.found, plugin_desc, eraro)
+      throw handle_load_error(
+        funcdesc.error,
+        funcdesc.found,
+        plugin_desc,
+        eraro
+      )
 
     builtin = false
     level++
@@ -439,7 +452,7 @@ function build_plugin_names() {
   prefix_list.forEach(function(prefix) {
     plugin_names.push({ type: 'normal', name: './' + prefix + name })
   })
-  
+
   return plugin_names
 }
 
@@ -464,74 +477,76 @@ function msgmap() {
 
 const intern = (module.exports.intern = {
   make_system_modules: function() {
-    return Module.builtinModules ? Module.builtinModules : [
-      'async_hooks',
-      'assert',
-      'buffer',
-      'child_process',
-      'console',
-      'constants',
-      'crypto',
-      'cluster',
-      'dgram',
-      'dns',
-      'domain',
-      'events',
-      'fs',
-      'http',
-      'http2',
-      '_http_agent',
-      '_http_client',
-      '_http_common',
-      '_http_incoming',
-      '_http_outgoing',
-      '_http_server',
-      'https',
-      'inspector',
-      'module',
-      'net',
-      'os',
-      'path',
-      'perf_hooks',
-      'process',
-      'punycode',
-      'querystring',
-      'readline',
-      'repl',
-      'stream',
-      '_stream_readable',
-      '_stream_writable',
-      '_stream_duplex',
-      '_stream_transform',
-      '_stream_passthrough',
-      '_stream_wrap',
-      'string_decoder',
-      'sys',
-      'timers',
-      'tls',
-      '_tls_common',
-      '_tls_wrap',
-      'trace_events',
-      'tty',
-      'url',
-      'util',
-      'v8',
-      'vm',
-      'zlib',
-      'v8/tools/splaytree',
-      'v8/tools/codemap',
-      'v8/tools/consarray',
-      'v8/tools/csvparser',
-      'v8/tools/profile',
-      'v8/tools/profile_view',
-      'v8/tools/logreader',
-      'v8/tools/arguments',
-      'v8/tools/tickprocessor',
-      'v8/tools/SourceMap',
-      'v8/tools/tickprocessor-driver',
-      'node-inspect/lib/_inspect',
-      'node-inspect/lib/internal/inspect_client',
-      'node-inspect/lib/internal/inspect_repl'
-    ]
+    return Module.builtinModules
+      ? Module.builtinModules
+      : [
+          'async_hooks',
+          'assert',
+          'buffer',
+          'child_process',
+          'console',
+          'constants',
+          'crypto',
+          'cluster',
+          'dgram',
+          'dns',
+          'domain',
+          'events',
+          'fs',
+          'http',
+          'http2',
+          '_http_agent',
+          '_http_client',
+          '_http_common',
+          '_http_incoming',
+          '_http_outgoing',
+          '_http_server',
+          'https',
+          'inspector',
+          'module',
+          'net',
+          'os',
+          'path',
+          'perf_hooks',
+          'process',
+          'punycode',
+          'querystring',
+          'readline',
+          'repl',
+          'stream',
+          '_stream_readable',
+          '_stream_writable',
+          '_stream_duplex',
+          '_stream_transform',
+          '_stream_passthrough',
+          '_stream_wrap',
+          'string_decoder',
+          'sys',
+          'timers',
+          'tls',
+          '_tls_common',
+          '_tls_wrap',
+          'trace_events',
+          'tty',
+          'url',
+          'util',
+          'v8',
+          'vm',
+          'zlib',
+          'v8/tools/splaytree',
+          'v8/tools/codemap',
+          'v8/tools/consarray',
+          'v8/tools/csvparser',
+          'v8/tools/profile',
+          'v8/tools/profile_view',
+          'v8/tools/logreader',
+          'v8/tools/arguments',
+          'v8/tools/tickprocessor',
+          'v8/tools/SourceMap',
+          'v8/tools/tickprocessor-driver',
+          'node-inspect/lib/_inspect',
+          'node-inspect/lib/internal/inspect_client',
+          'node-inspect/lib/internal/inspect_repl'
+        ]
   }
 })
