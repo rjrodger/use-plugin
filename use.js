@@ -1,8 +1,9 @@
-/* Copyright © 2014-2018 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2014-2019 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 var Path = require('path')
 var Util = require('util')
+var Module = require("module")
 
 // Generic plugin loader functionality for Node.js frameworks.
 
@@ -355,8 +356,6 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
     try {
       plugin_desc.history.push({ module: reqfunc.module, path: search.name })
 
-      //console.log(reqfunc.module, search)
-
       initfunc = reqfunc(search.name)
 
       // Found it!
@@ -419,6 +418,12 @@ function build_plugin_names() {
     })
   }
 
+  // Try the prefix first - this ensures something like seneca-joi works
+  // where there is also a joi module
+  prefix_list.forEach(function(prefix) {
+    plugin_names.push({ type: 'normal', name: prefix + name })
+  })
+
   // Vanilla require on the plugin name.
   // Common case: the require succeeds on first module parent,
   // because the plugin is an npm module
@@ -427,11 +432,6 @@ function build_plugin_names() {
   if (-1 == system_modules.indexOf(name)) {
     plugin_names.push({ type: 'normal', name: name })
   }
-
-  // Try the prefix next.
-  prefix_list.forEach(function(prefix) {
-    plugin_names.push({ type: 'normal', name: prefix + name })
-  })
 
   // OK, probably not an npm module, try locally.
   plugin_names.push({ type: 'normal', name: './' + name })
@@ -464,7 +464,7 @@ function msgmap() {
 
 const intern = (module.exports.intern = {
   make_system_modules: function() {
-    return [
+    return Module.builtinModules ? Module.builtinModules : [
       'async_hooks',
       'assert',
       'buffer',
