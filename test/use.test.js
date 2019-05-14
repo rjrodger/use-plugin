@@ -1,16 +1,17 @@
-/* Copyright (c) 2014-2018 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2019 Richard Rodger, MIT License */
 'use strict'
 
+var Util = require('util')
 var Assert = require('assert')
 
-var Lab = require('lab')
-var Code = require('code')
+var Lab = require('@hapi/lab')
+var Code = require('@hapi/code')
 
 var Origin = require('./origin')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
+var it = make_it(lab)
 var expect = Code.expect
 
 describe('use', function() {
@@ -368,3 +369,20 @@ describe('use', function() {
     fin()
   })
 })
+
+function make_it(lab) {
+  return function it(name, opts, func) {
+    if ('function' === typeof opts) {
+      func = opts
+      opts = {}
+    }
+    
+    lab.it(
+      name,
+      opts,
+      Util.promisify(function(x, fin) {
+        func(fin)
+      })
+    )
+  }
+}

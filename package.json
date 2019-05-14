@@ -26,13 +26,13 @@
     "eraro": "^1.0.0",
     "nid": "^0.3.2",
     "norma": "^0.4.1",
-    "optioner": "^3.0.0"
+    "optioner": "^4.0.0"
   },
   "devDependencies": {
-    "code": "^4.1.0",
-    "coveralls": "^3.0.2",
-    "lab": "^14.3.4",
-    "prettier": "^1.16.4"
+    "@hapi/code": "^5.3.1",
+    "@hapi/lab": "^18.1.2",
+    "coveralls": "^3.0.3",
+    "prettier": "^1.17.1"
   },
   "files": [
     "README.md",
