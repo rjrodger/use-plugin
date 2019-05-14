@@ -376,7 +376,7 @@ function make_it(lab) {
       func = opts
       opts = {}
     }
-    
+
     lab.it(
       name,
       opts,

@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
@@ -40,6 +40,6 @@
     "use.js"
   ],
   "engines": {
-    "node": ">=4"
+    "node": ">=8"
   }
 }
