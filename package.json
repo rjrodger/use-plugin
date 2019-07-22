@@ -23,16 +23,16 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "license": "MIT",
   "dependencies": {
+    "@hapi/lab": "^19.1.0",
     "eraro": "^1.0.0",
     "nid": "^0.3.2",
-    "norma": "^0.4.1",
+    "norma": "^1.0.0",
     "optioner": "^4.0.0"
   },
   "devDependencies": {
     "@hapi/code": "^5.3.1",
-    "@hapi/lab": "^18.1.2",
-    "coveralls": "^3.0.3",
-    "prettier": "^1.17.1"
+    "coveralls": "^3.0.5",
+    "prettier": "^1.18.2"
   },
   "files": [
     "README.md",
