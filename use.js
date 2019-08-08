@@ -349,6 +349,7 @@ function make_reqfunc(module) {
 
   var reqfunc = module.require.bind(module)
   reqfunc.module = module.id
+
   return reqfunc
 }
 
@@ -367,10 +368,20 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
       continue
 
     try {
-      plugin_desc.history.push({ module: reqfunc.module, path: search.name })
+      // NOTE: Unfortunately module.require does not expose require.resolve
+      if(reqfunc.resolve) {
+        search.path = reqfunc.resolve(search.name)
+      }
 
+      var history_entry = {
+        module: reqfunc.module,
+        path: search.path,
+        name: search.name
+      }
+      plugin_desc.history.push(history_entry)
+      
       initfunc = reqfunc(search.name)
-
+      
       // Found it!
       break
     } catch (e) {
@@ -394,6 +405,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
     initfunc: initfunc,
     module: reqfunc.module,
     require: search.name,
+    path: search.path,
     found: search
   }
 }
