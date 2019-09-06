@@ -369,7 +369,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 
     try {
       // NOTE: Unfortunately module.require does not expose require.resolve
-      if(reqfunc.resolve) {
+      if (reqfunc.resolve) {
         search.path = reqfunc.resolve(search.name)
       }
 
@@ -379,9 +379,9 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
         name: search.name
       }
       plugin_desc.history.push(history_entry)
-      
+
       initfunc = reqfunc(search.name)
-      
+
       // Found it!
       break
     } catch (e) {
