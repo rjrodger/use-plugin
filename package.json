@@ -9,6 +9,7 @@
     "coverage": "lab -v test/use.test.js -t 85 -r html > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js",
     "clean": "rm -rf node_modules yarn.lock package-lock.json",
+    "reset": "npm run clean && npm i && npm test",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run prettier && npm test && npm run repo-tag --registry http://registry.npmjs.org && npm publish --registry http://registry.npmjs.org "
   },
@@ -23,16 +24,16 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "license": "MIT",
   "dependencies": {
-    "@hapi/lab": "^20.2.2",
-    "eraro": "^1.1.0",
+    "eraro": "^2.0.0",
     "nid": "^0.3.2",
-    "norma": "^1.0.0",
-    "optioner": "^4.1.2"
+    "norma": "^2.0.0",
+    "optioner": "^4.2.0"
   },
   "devDependencies": {
-    "@hapi/code": "^6.0.0",
-    "coveralls": "^3.0.6",
-    "prettier": "^1.18.2"
+    "@hapi/lab": "^21.0.0",
+    "@hapi/code": "^7.0.0",
+    "coveralls": "^3.0.9",
+    "prettier": "^1.19.1"
   },
   "files": [
     "README.md",
