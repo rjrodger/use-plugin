@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
@@ -26,7 +26,7 @@
   "dependencies": {
     "eraro": "^2.0.0",
     "nid": "^0.3.2",
-    "norma": "^2.0.1",
+    "norma": "^2.0.2",
     "optioner": "^4.2.0"
   },
   "devDependencies": {
