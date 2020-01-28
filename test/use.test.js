@@ -303,7 +303,7 @@ describe('use', function() {
     } catch (e) {
       expect(e.code).equals('invalid_option')
       expect(e.message).equals(
-        'use-plugin: Plugin p2: option value is not valid: child "a" fails because ["a" must be a string] in options { a: 1 }'
+        'use-plugin: Plugin p2: option value is not valid: "a" must be a string in options { a: 1 }'
       )
       fin()
     }

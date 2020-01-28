@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "6.0.2",
+  "version": "7.0.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
@@ -24,14 +24,14 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "license": "MIT",
   "dependencies": {
-    "eraro": "^2.0.0",
+    "eraro": "^2.1.0",
     "nid": "^0.3.2",
     "norma": "^2.0.2",
-    "optioner": "^4.2.0"
+    "optioner": "^5.0.0"
   },
   "devDependencies": {
-    "@hapi/lab": "^21.0.0",
-    "@hapi/code": "^7.0.0",
+    "@hapi/lab": "^22.0.3",
+    "@hapi/code": "^8.0.1",
     "coveralls": "^3.0.9",
     "prettier": "^1.19.1"
   },

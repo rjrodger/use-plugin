@@ -1,4 +1,4 @@
-/* Copyright © 2014-2019 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2014-2020 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 var Path = require('path')

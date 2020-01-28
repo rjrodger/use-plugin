@@ -3,6 +3,7 @@
 [![Npm][BadgeNpm]][Npm]
 [![Travis][BadgeTravis]][Travis]
 [![Coveralls][BadgeCoveralls]][Coveralls]
+[![Maintainability](https://api.codeclimate.com/v1/badges/cd525f235bd974fc1a6c/maintainability)](https://codeclimate.com/github/rjrodger/use-plugin/maintainability)
 
 
 ## Generic plugin loader functionality for Node.js frameworks.
