@@ -35,7 +35,7 @@ function make(useopts) {
       module: module.parent,
       errmsgprefix: true,
       system_modules: intern.make_system_modules(),
-      merge_defaults: true
+      merge_defaults: true,
     },
     useopts
   )
@@ -45,7 +45,7 @@ function make(useopts) {
     package: 'use-plugin',
     msgmap: msgmap(),
     module: module,
-    prefix: useopts.errmsgprefix
+    prefix: useopts.errmsgprefix,
   })
 
   // This is the function that loads plugins.
@@ -82,11 +82,11 @@ function make(useopts) {
   use.Optioner = Optioner
   use.Joi = Optioner.Joi
 
-  use.use_plugin_desc = function(plugin_desc) {
+  use.use_plugin_desc = function (plugin_desc) {
     return use_plugin_desc(plugin_desc, useopts, eraro)
   }
 
-  use.build_plugin_desc = function() {
+  use.build_plugin_desc = function () {
     var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
     return build_plugin_desc(args, useopts, eraro)
   }
@@ -109,27 +109,21 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
     load_plugin(plugin_desc, useopts.module, eraro)
   }
 
-
   var defaults = null
 
-  
   var Joi = Optioner.Joi
-  
-  if(plugin_desc.init && Joi.isSchema(plugin_desc.init.defaults)) {
-    defaults = plugin_desc.init.defaults
-  }
 
-  else if(Joi.isSchema(plugin_desc.defaults)) {
+  if (plugin_desc.init && Joi.isSchema(plugin_desc.init.defaults)) {
+    defaults = plugin_desc.init.defaults
+  } else if (Joi.isSchema(plugin_desc.defaults)) {
     defaults = plugin_desc.defaults
-  }
-  else {
+  } else {
     defaults = Object.assign(
       {},
       plugin_desc.defaults,
       plugin_desc.init && plugin_desc.init.defaults
     )
   }
-
 
   /*
   var defaults = Object.assign(
@@ -139,7 +133,6 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
   )
   */
 
-  
   plugin_desc.defaults = defaults
 
   if (useopts.merge_defaults && 'object' === typeof defaults) {
@@ -151,7 +144,7 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
       throw eraro('invalid_option', {
         name: plugin_desc.name,
         err_msg: e.message,
-        options: plugin_desc.options
+        options: plugin_desc.options,
       })
     }
   }
@@ -167,9 +160,9 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
     }
 
     var b = []
-    Object.keys(foldermap).forEach(function(folder) {
+    Object.keys(foldermap).forEach(function (folder) {
       b.push('[ ' + Path.resolve(folder) + ': ')
-      foldermap[folder].forEach(function(path) {
+      foldermap[folder].forEach(function (path) {
         b.push(path + ', ')
       })
       b.push(' ] ')
@@ -200,7 +193,7 @@ function build_plugin_desc(spec, useopts, eraro) {
   var plugin_desc = {
     options: options,
     callback: spec.callback,
-    history: []
+    history: [],
   }
 
   // The most common case, where the plugin is
@@ -237,7 +230,7 @@ function build_plugin_desc(spec, useopts, eraro) {
     if (null != plugin_desc.init && 'function' !== typeof plugin_desc.init) {
       throw eraro('no_init_function', {
         name: plugin_desc.name,
-        plugin: plugin
+        plugin: plugin,
       })
     }
   }
@@ -401,7 +394,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
       var history_entry = {
         module: reqfunc.module,
         path: search.path,
-        name: search.name
+        name: search.name,
       }
       plugin_desc.history.push(history_entry)
 
@@ -431,7 +424,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
     module: reqfunc.module,
     require: search.name,
     path: search.path,
-    found: search
+    found: search,
   }
 }
 
@@ -460,9 +453,9 @@ function build_plugin_names() {
 
   // Do the builtins first! But only for the framework module, see above.
   if (!name.match(/^[.\/]/)) {
-    builtin_list.forEach(function(builtin) {
+    builtin_list.forEach(function (builtin) {
       plugin_names.push({ type: 'builtin', name: builtin + name })
-      prefix_list.forEach(function(prefix) {
+      prefix_list.forEach(function (prefix) {
         plugin_names.push({ type: 'builtin', name: builtin + prefix + name })
       })
     })
@@ -470,7 +463,7 @@ function build_plugin_names() {
 
   // Try the prefix first - this ensures something like seneca-joi works
   // where there is also a joi module
-  prefix_list.forEach(function(prefix) {
+  prefix_list.forEach(function (prefix) {
     plugin_names.push({ type: 'normal', name: prefix + name })
   })
 
@@ -486,7 +479,7 @@ function build_plugin_names() {
   // OK, probably not an npm module, try locally.
   plugin_names.push({ type: 'normal', name: './' + name })
 
-  prefix_list.forEach(function(prefix) {
+  prefix_list.forEach(function (prefix) {
     plugin_names.push({ type: 'normal', name: './' + prefix + name })
   })
 
@@ -508,12 +501,12 @@ function msgmap() {
     load_failed:
       'Could not load plugin <%=name%> defined in <%=found_name%> due to error: <%=err_msg%>.',
     invalid_option:
-      'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>'
+      'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>',
   }
 }
 
 const intern = (module.exports.intern = {
-  make_system_modules: function() {
+  make_system_modules: function () {
     return Module.builtinModules
       ? Module.builtinModules
       : [
@@ -583,7 +576,7 @@ const intern = (module.exports.intern = {
           'v8/tools/tickprocessor-driver',
           'node-inspect/lib/_inspect',
           'node-inspect/lib/internal/inspect_client',
-          'node-inspect/lib/internal/inspect_repl'
+          'node-inspect/lib/internal/inspect_repl',
         ]
-  }
+  },
 })

@@ -1,13 +1,13 @@
 {
   "name": "use-plugin",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
     "test": "lab -v test/use.test.js -t 90 -I SharedArrayBuffer,Atomics,URL,URLSearchParams,BigUint64Array,BigInt64Array,BigInt",
     "coveralls": "lab -s test/use.test.js -r lcov | coveralls",
     "coverage": "lab -v test/use.test.js -t 85 -r html > coverage.html",
-    "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js",
+    "prettier": "prettier --write --no-semi --single-quote *.js  test/*.js",
     "clean": "rm -rf node_modules yarn.lock package-lock.json",
     "reset": "npm run clean && npm i && npm test",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
@@ -41,6 +41,6 @@
     "use.js"
   ],
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   }
 }

@@ -14,10 +14,10 @@ var describe = lab.describe
 var it = make_it(lab)
 var expect = Code.expect
 
-describe('use', function() {
+describe('use', function () {
   // NOTE: does not work if run using `lab -P test -g plugin-desc`
   // as module resolution fails
-  it('happy', function(fin) {
+  it('happy', function (fin) {
     var p0 = Origin.use('p0')
     Assert.equal('p0', p0.name)
     Assert.equal('p0', p0.init())
@@ -25,7 +25,7 @@ describe('use', function() {
   })
 
   // Ensures Seneca.use('repl') works for seneca-repl
-  it('prefix-repl', function(fin) {
+  it('prefix-repl', function (fin) {
     var usep = Origin.makeuse({ prefix: 'p-' })
     var repl = usep('repl')
     Assert.equal('repl', repl.name)
@@ -33,23 +33,23 @@ describe('use', function() {
     fin()
   })
 
-  it('prefix-edges', function(fin) {
+  it('prefix-edges', function (fin) {
     var usep = Origin.makeuse({ prefix: 'a-' })
-    expect(usep(function() {}).name).startsWith('a-')
+    expect(usep(function () {}).name).startsWith('a-')
 
     usep = Origin.makeuse({ prefix: ['aa-', 'bb-'] })
-    expect(usep(function() {}).name).startsWith('aa-')
+    expect(usep(function () {}).name).startsWith('aa-')
 
     fin()
   })
 
-  it('clientlib0', function(fin) {
+  it('clientlib0', function (fin) {
     var client0 = require('./lib0/client0')
     var p0 = client0('p0')
     fin()
   })
 
-  it('load', function(fin) {
+  it('load', function (fin) {
     // still loads p0.js! $a just => tag == 'a'
     var p0 = Origin.use('p0$a')
     Assert.equal('p0', p0.name)
@@ -58,8 +58,8 @@ describe('use', function() {
     fin()
   })
 
-  it('function', function(fin) {
-    var f0 = Origin.use(function() {
+  it('function', function (fin) {
+    var f0 = Origin.use(function () {
       return 'f0'
     })
     //console.log(f0)
@@ -81,7 +81,7 @@ describe('use', function() {
       function f1$t0() {
         return 'f1tcr'
       },
-      function() {
+      function () {
         return 'f1tck'
       }
     )
@@ -93,7 +93,7 @@ describe('use', function() {
 
     var usep = Origin.makeuse({ prefix: 's-' })
 
-    var f2 = usep(function() {
+    var f2 = usep(function () {
       return 'f2'
     })
     Assert.ok(0 == f2.name.indexOf('s-'))
@@ -113,7 +113,7 @@ describe('use', function() {
       function f3$t1() {
         return 'f3tcr'
       },
-      function() {
+      function () {
         return 'f3tck'
       }
     )
@@ -127,13 +127,13 @@ describe('use', function() {
     fin()
   })
 
-  it('function-options', function(fin) {
+  it('function-options', function (fin) {
     var f1 = Origin.use(function f1() {}, { a: 1 })
     Assert.equal(f1.options.a, 1)
     fin()
   })
 
-  it('object', function(fin) {
+  it('object', function (fin) {
     var use = Origin.use
 
     try {
@@ -167,9 +167,9 @@ describe('use', function() {
 
     var a = use({
       name: 'a',
-      init: function() {
+      init: function () {
         return 'ar'
-      }
+      },
     })
     Assert.equal('a', a.name)
     Assert.equal('ar', a.init())
@@ -180,7 +180,7 @@ describe('use', function() {
     var b = use({
       name: 'b',
       tag: '0',
-      init: function() {}
+      init: function () {},
     })
 
     Assert.equal('b', b.name)
@@ -190,7 +190,7 @@ describe('use', function() {
     fin()
   })
 
-  it('error', function(fin) {
+  it('error', function (fin) {
     var use = Origin.use
 
     try {
@@ -206,7 +206,7 @@ describe('use', function() {
 
   // NOTE: does not work if run using `lab -P test -g plugin-desc`
   // as module resolution fails
-  it('basic-defaults', function(fin) {
+  it('basic-defaults', function (fin) {
     var p1 = Origin.use('p1', { b: 2 })
 
     expect(p1.name).equal('p1n')
@@ -217,7 +217,7 @@ describe('use', function() {
     var p2 = Origin.use(
       {
         name: 'p2n',
-        init: function() {
+        init: function () {
           return 'p2x'
         },
         defaults: {
@@ -225,8 +225,8 @@ describe('use', function() {
           b: 2,
           c: true,
           d: { e: 3 },
-          f: { g: 4 }
-        }
+          f: { g: 4 },
+        },
       },
       { c: false, f: { h: 5 } }
     )
@@ -239,7 +239,7 @@ describe('use', function() {
       f: { h: 5, g: 4 },
       a: 'A',
       b: 2,
-      d: { e: 3 }
+      d: { e: 3 },
     })
 
     var p3f = function p3n() {
@@ -253,21 +253,21 @@ describe('use', function() {
     expect(p3.defaults).contains({ a: 1 })
     expect(p3.options).equal({
       a: 1,
-      b: 2
+      b: 2,
     })
 
     fin()
   })
 
-  it('no-merge-defaults', function(fin) {
+  it('no-merge-defaults', function (fin) {
     var use_nm = Origin.makeuse({ merge_defaults: false })
 
     // options are not merged
     var p0 = use_nm({
       name: 'p0',
-      init: function() {},
+      init: function () {},
       defaults: { a: 1, c: 4 },
-      options: { a: 2, b: 3 }
+      options: { a: 2, b: 3 },
     })
 
     expect(p0.defaults).equal({ a: 1, c: 4 })
@@ -276,9 +276,9 @@ describe('use', function() {
     // options are merged
     var p1 = Origin.use({
       name: 'p1',
-      init: function() {},
+      init: function () {},
       defaults: { a: 1, c: 4 },
-      options: { a: 2, b: 3 }
+      options: { a: 2, b: 3 },
     })
 
     expect(p1.defaults).equal({ a: 1, c: 4 })
@@ -287,15 +287,15 @@ describe('use', function() {
     fin()
   })
 
-  it('option-fail', function(fin) {
+  it('option-fail', function (fin) {
     try {
       Origin.use(
         {
           name: 'p2',
-          init: function() {},
+          init: function () {},
           defaults: {
-            a: Origin.use.Joi.string()
-          }
+            a: Origin.use.Joi.string(),
+          },
         },
         { a: 1 }
       )
@@ -309,13 +309,13 @@ describe('use', function() {
     }
   })
 
-  it('frozen-options', function(fin) {
+  it('frozen-options', function (fin) {
     var f1 = Origin.use(function f1() {}, Object.freeze({ a: 1 }))
     Assert.equal(f1.options.a, 1)
     fin()
   })
 
-  it('edges', function(fin) {
+  it('edges', function (fin) {
     try {
       Origin.use()
       Code.fail()
@@ -358,13 +358,13 @@ describe('use', function() {
       expect(e.code).equals('not_found')
     }
 
-    var n1 = Origin.use({ name: 'n1', init: function() {} }, null)
+    var n1 = Origin.use({ name: 'n1', init: function () {} }, null)
     expect(n1.options).equal({})
 
     fin()
   })
 
-  it('intern-make_system_modules', function(fin) {
+  it('intern-make_system_modules', function (fin) {
     Assert(Origin.makeuse.intern.make_system_modules().length > 0)
     fin()
   })
@@ -380,7 +380,7 @@ function make_it(lab) {
     lab.it(
       name,
       opts,
-      Util.promisify(function(x, fin) {
+      Util.promisify(function (x, fin) {
         func(fin)
       })
     )

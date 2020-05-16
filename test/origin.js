@@ -4,5 +4,5 @@ var localuse = makeuse()
 
 module.exports = {
   use: makeuse(),
-  makeuse: makeuse
+  makeuse: makeuse,
 }
