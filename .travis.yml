@@ -2,13 +2,13 @@ language: node_js
 sudo: false
 
 node_js:
+  - 14
+  - 13
   - 12
-  - 11
   - 10
-  - 8
 
 after_script:
-  - node_version=$(node -v); if [ ${node_version:1:2} -ge 10 ]; then npm audit; fi
+  - npm audit
   - npm run coveralls
 
 
