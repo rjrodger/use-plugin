@@ -297,14 +297,15 @@ function load_plugin(plugin_desc, start_module, eraro) {
   ) {
     funcdesc = perform_require(reqfunc, plugin_desc, builtin, level)
 
-    if (funcdesc.error)
+    if (funcdesc.error) {
       throw handle_load_error(
         funcdesc.error,
         funcdesc.found,
         plugin_desc,
         eraro
       )
-
+    }
+    
     builtin = false
     level++
     current_module = current_module.parent
@@ -410,6 +411,10 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
       break
     } catch (e) {
       if ('MODULE_NOT_FOUND' == e.code) {
+        // TODO: this fails if a sub file of the plugin module fails,
+        // as the module name is within the file path
+        // E.g. seneca-entity/lib/common.js
+
         // A require failed inside the plugin.
         if (-1 == e.message.indexOf(search.name)) {
           return { error: e, found: search }
