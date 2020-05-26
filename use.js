@@ -114,10 +114,14 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   if (
     plugin_desc.init &&
-    Joi.isSchema(plugin_desc.init.defaults, { legacy: true })
+    (Joi.isSchema(plugin_desc.init.defaults, { legacy: true }) ||
+      'function' === typeof plugin_desc.init.defaults)
   ) {
     defaults = plugin_desc.init.defaults
-  } else if (Joi.isSchema(plugin_desc.defaults, { legacy: true })) {
+  } else if (
+    Joi.isSchema(plugin_desc.defaults, { legacy: true }) ||
+    'function' === typeof plugin_desc.defaults
+  ) {
     defaults = plugin_desc.defaults
   } else {
     defaults = Object.assign(
@@ -126,14 +130,6 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
       plugin_desc.init && plugin_desc.init.defaults
     )
   }
-
-  /*
-  var defaults = Object.assign(
-    {},
-    plugin_desc.defaults,
-    plugin_desc.init && plugin_desc.init.defaults
-  )
-  */
 
   plugin_desc.defaults = defaults
 
