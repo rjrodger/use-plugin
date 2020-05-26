@@ -112,9 +112,12 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   var Joi = Optioner.Joi
 
-  if (plugin_desc.init && Joi.isSchema(plugin_desc.init.defaults, {legacy:true})) {
+  if (
+    plugin_desc.init &&
+    Joi.isSchema(plugin_desc.init.defaults, { legacy: true })
+  ) {
     defaults = plugin_desc.init.defaults
-  } else if (Joi.isSchema(plugin_desc.defaults, {legacy:true})) {
+  } else if (Joi.isSchema(plugin_desc.defaults, { legacy: true })) {
     defaults = plugin_desc.defaults
   } else {
     defaults = Object.assign(
@@ -224,17 +227,16 @@ function build_plugin_desc(spec, useopts, eraro) {
     plugin_desc = Object.assign({}, plugin, plugin_desc)
 
     var name = plugin_desc.name
-    if ('string' !== typeof name ) {
+    if ('string' !== typeof name) {
       name = null != plugin_desc.init ? plugin_desc.init.name : null
     }
 
-    if( null == name ) {
+    if (null == name) {
       throw eraro('no_name', { plugin: plugin })
-    }
-    else {
+    } else {
       plugin_desc.name = name
     }
-    
+
     if (null != plugin_desc.init && 'function' !== typeof plugin_desc.init) {
       throw eraro('no_init_function', {
         name: name,
