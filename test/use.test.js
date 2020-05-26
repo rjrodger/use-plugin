@@ -187,6 +187,16 @@ describe('use', function () {
     Assert.equal('0', b.tag)
     Assert.equal('b$0', b.full)
 
+
+    var c = use({
+      init: function c() {
+        return 'ac'
+      },
+    })
+    Assert.equal('c', c.name)
+    Assert.equal('ac', c.init())
+
+    
     fin()
   })
 

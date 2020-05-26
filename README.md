@@ -4,6 +4,7 @@
 [![Travis][BadgeTravis]][Travis]
 [![Coveralls][BadgeCoveralls]][Coveralls]
 [![Maintainability](https://api.codeclimate.com/v1/badges/cd525f235bd974fc1a6c/maintainability)](https://codeclimate.com/github/rjrodger/use-plugin/maintainability)
+[![DeepScan grade](https://deepscan.io/api/teams/5016/projects/11882/branches/177478/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=11882&bid=177478)
 
 
 ## Generic plugin loader functionality for Node.js frameworks.

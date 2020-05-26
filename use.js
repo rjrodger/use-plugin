@@ -2,7 +2,6 @@
 'use strict'
 
 var Path = require('path')
-var Util = require('util')
 var Module = require('module')
 
 // Generic plugin loader functionality for Node.js frameworks.
@@ -113,9 +112,9 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   var Joi = Optioner.Joi
 
-  if (plugin_desc.init && Joi.isSchema(plugin_desc.init.defaults)) {
+  if (plugin_desc.init && Joi.isSchema(plugin_desc.init.defaults, {legacy:true})) {
     defaults = plugin_desc.init.defaults
-  } else if (Joi.isSchema(plugin_desc.defaults)) {
+  } else if (Joi.isSchema(plugin_desc.defaults, {legacy:true})) {
     defaults = plugin_desc.defaults
   } else {
     defaults = Object.assign(
@@ -224,12 +223,21 @@ function build_plugin_desc(spec, useopts, eraro) {
   else if ('object' === typeof plugin) {
     plugin_desc = Object.assign({}, plugin, plugin_desc)
 
-    if ('string' !== typeof plugin_desc.name)
-      throw eraro('no_name', { plugin: plugin })
+    var name = plugin_desc.name
+    if ('string' !== typeof name ) {
+      name = null != plugin_desc.init ? plugin_desc.init.name : null
+    }
 
+    if( null == name ) {
+      throw eraro('no_name', { plugin: plugin })
+    }
+    else {
+      plugin_desc.name = name
+    }
+    
     if (null != plugin_desc.init && 'function' !== typeof plugin_desc.init) {
       throw eraro('no_init_function', {
-        name: plugin_desc.name,
+        name: name,
         plugin: plugin,
       })
     }
@@ -350,7 +358,7 @@ function handle_load_error(err, found, plugin_desc, eraro) {
   // This covers the case where the plugin contains
   // _require_ calls that themselves fail.
   else if ('MODULE_NOT_FOUND' == err.code) {
-    plugin_desc.err_msg = err.stack.replace(/\n.*\(module\.js\:.*/g, '')
+    plugin_desc.err_msg = err.stack.replace(/\n.*\(module\.js:.*/g, '')
     plugin_desc.err_msg = plugin_desc.err_msg.replace(/\s+/g, ' ')
     return eraro('require_failed', plugin_desc)
   }
@@ -382,7 +390,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
     // only load builtins if builtin flag true
     if (!builtin && 'builtin' == search.type) continue
 
-    if (0 === level && 'builtin' != search.type && search.name.match(/^[.\/]/))
+    if (0 === level && 'builtin' != search.type && search.name.match(/^[./]/))
       continue
 
     try {
@@ -452,7 +460,7 @@ function build_plugin_names() {
   var plugin_names = []
 
   // Do the builtins first! But only for the framework module, see above.
-  if (!name.match(/^[.\/]/)) {
+  if (!name.match(/^[./]/)) {
     builtin_list.forEach(function (builtin) {
       plugin_names.push({ type: 'builtin', name: builtin + name })
       prefix_list.forEach(function (prefix) {
@@ -508,75 +516,5 @@ function msgmap() {
 const intern = (module.exports.intern = {
   make_system_modules: function () {
     return Module.builtinModules
-      ? Module.builtinModules
-      : [
-          'async_hooks',
-          'assert',
-          'buffer',
-          'child_process',
-          'console',
-          'constants',
-          'crypto',
-          'cluster',
-          'dgram',
-          'dns',
-          'domain',
-          'events',
-          'fs',
-          'http',
-          'http2',
-          '_http_agent',
-          '_http_client',
-          '_http_common',
-          '_http_incoming',
-          '_http_outgoing',
-          '_http_server',
-          'https',
-          'inspector',
-          'module',
-          'net',
-          'os',
-          'path',
-          'perf_hooks',
-          'process',
-          'punycode',
-          'querystring',
-          'readline',
-          'repl',
-          'stream',
-          '_stream_readable',
-          '_stream_writable',
-          '_stream_duplex',
-          '_stream_transform',
-          '_stream_passthrough',
-          '_stream_wrap',
-          'string_decoder',
-          'sys',
-          'timers',
-          'tls',
-          '_tls_common',
-          '_tls_wrap',
-          'trace_events',
-          'tty',
-          'url',
-          'util',
-          'v8',
-          'vm',
-          'zlib',
-          'v8/tools/splaytree',
-          'v8/tools/codemap',
-          'v8/tools/consarray',
-          'v8/tools/csvparser',
-          'v8/tools/profile',
-          'v8/tools/profile_view',
-          'v8/tools/logreader',
-          'v8/tools/arguments',
-          'v8/tools/tickprocessor',
-          'v8/tools/SourceMap',
-          'v8/tools/tickprocessor-driver',
-          'node-inspect/lib/_inspect',
-          'node-inspect/lib/internal/inspect_client',
-          'node-inspect/lib/internal/inspect_repl',
-        ]
   },
 })

@@ -4,7 +4,7 @@
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
-    "test": "lab -v test/use.test.js -t 90 -I SharedArrayBuffer,Atomics,URL,URLSearchParams,BigUint64Array,BigInt64Array,BigInt",
+    "test": "lab -v test/use.test.js -L -t 85 -r console -o stdout -r html -o test/coverage.html",
     "coveralls": "lab -s test/use.test.js -r lcov | coveralls",
     "coverage": "lab -v test/use.test.js -t 85 -r html > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote *.js  test/*.js",
