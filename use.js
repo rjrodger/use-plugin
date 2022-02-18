@@ -35,6 +35,7 @@ function make(useopts) {
       errmsgprefix: true,
       system_modules: intern.make_system_modules(),
       merge_defaults: true,
+      gubu: true,
     },
     useopts
   )
@@ -110,17 +111,24 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   var defaults = null
 
+  // TODO: deprecate
   var Joi = Optioner.Joi
 
   if (
     plugin_desc.init &&
+      plugin_desc.init.defaults && 
     (Joi.isSchema(plugin_desc.init.defaults, { legacy: true }) ||
-      'function' === typeof plugin_desc.init.defaults)
+     // TODO: use Gubu.isShape
+     (plugin_desc.init.defaults.gubu && plugin_desc.init.defaults.gubu.gubu$) ||
+     'function' === typeof plugin_desc.init.defaults)
   ) {
     defaults = plugin_desc.init.defaults
   } else if (
-    Joi.isSchema(plugin_desc.defaults, { legacy: true }) ||
-    'function' === typeof plugin_desc.defaults
+    plugin_desc.defaults &&
+      (Joi.isSchema(plugin_desc.defaults, { legacy: true }) ||
+     // TODO: use Gubu.isShape
+     (plugin_desc.defaults.gubu && plugin_desc.defaults.gubu.gubu$) ||
+       'function' === typeof plugin_desc.defaults)
   ) {
     defaults = plugin_desc.defaults
   } else {
