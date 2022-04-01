@@ -116,19 +116,20 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   if (
     plugin_desc.init &&
-      plugin_desc.init.defaults && 
+    plugin_desc.init.defaults &&
     (Joi.isSchema(plugin_desc.init.defaults, { legacy: true }) ||
-     // TODO: use Gubu.isShape
-     (plugin_desc.init.defaults.gubu && plugin_desc.init.defaults.gubu.gubu$) ||
-     'function' === typeof plugin_desc.init.defaults)
+      // TODO: use Gubu.isShape
+      (plugin_desc.init.defaults.gubu &&
+        plugin_desc.init.defaults.gubu.gubu$) ||
+      'function' === typeof plugin_desc.init.defaults)
   ) {
     defaults = plugin_desc.init.defaults
   } else if (
     plugin_desc.defaults &&
-      (Joi.isSchema(plugin_desc.defaults, { legacy: true }) ||
-     // TODO: use Gubu.isShape
-     (plugin_desc.defaults.gubu && plugin_desc.defaults.gubu.gubu$) ||
-       'function' === typeof plugin_desc.defaults)
+    (Joi.isSchema(plugin_desc.defaults, { legacy: true }) ||
+      // TODO: use Gubu.isShape
+      (plugin_desc.defaults.gubu && plugin_desc.defaults.gubu.gubu$) ||
+      'function' === typeof plugin_desc.defaults)
   ) {
     defaults = plugin_desc.defaults
   } else {
@@ -313,7 +314,7 @@ function load_plugin(plugin_desc, start_module, eraro) {
         eraro
       )
     }
-    
+
     builtin = false
     level++
     current_module = current_module.parent

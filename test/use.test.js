@@ -1,18 +1,20 @@
-/* Copyright (c) 2014-2019 Richard Rodger, MIT License */
+/* Copyright (c) 2014-2022 Richard Rodger, MIT License */
 'use strict'
 
-var Util = require('util')
-var Assert = require('assert')
+const Util = require('util')
+const Assert = require('assert')
 
-var Lab = require('@hapi/lab')
-var Code = require('@hapi/code')
+const Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
 
-var Origin = require('./origin')
+const Origin = require('./origin')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var it = make_it(lab)
-var expect = Code.expect
+const lab = (exports.lab = Lab.script())
+const describe = lab.describe
+const it = make_it(lab)
+const expect = Code.expect
+
+const { Gubu } = require('gubu')
 
 describe('use', function () {
   // NOTE: does not work if run using `lab -P test -g plugin-desc`
@@ -315,6 +317,18 @@ describe('use', function () {
       )
       fin()
     }
+  })
+
+  it('gubu-defaults', function (fin) {
+    var g0 = Origin.use({
+      init: () => {},
+      defaults: Gubu({ a: 1 }),
+    })
+
+    expect(g0.defaults.gubu.gubu$).exist()
+    expect(g0.defaults()).equal({ a: 1 })
+
+    fin()
   })
 
   it('frozen-options', function (fin) {
