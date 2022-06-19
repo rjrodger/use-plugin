@@ -1,21 +1,23 @@
-/* Copyright © 2014-2020 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2014-2022 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
-var Path = require('path')
-var Module = require('module')
+const Path = require('path')
+const Module = require('module')
 
 // Generic plugin loader functionality for Node.js frameworks.
 
 // #### External modules
-var Nid = require('nid')
-var Norma = require('norma')
-var Eraro = require('eraro')
-var Optioner = require('optioner')
+const Nid = require('nid')
+const Norma = require('norma')
+const Eraro = require('eraro')
+const DefaultsDeep = require('lodash.defaultsdeep')
+
+// const Optioner = require('optioner')
 
 // #### Exports
 module.exports = make
-module.exports.Joi = Optioner.Joi
-module.exports.Optioner = Optioner
+// module.exports.Joi = Optioner.Joi
+// module.exports.Optioner = Optioner
 
 // #### Create a _use_ function
 // Parameters:
@@ -41,7 +43,7 @@ function make(useopts) {
   )
 
   // Setup error messages, see msgmap function below for text.
-  var eraro = Eraro({
+  const eraro = Eraro({
     package: 'use-plugin',
     msgmap: msgmap(),
     module: module,
@@ -71,7 +73,10 @@ function make(useopts) {
   //   * _tag_ : String; the tag value of the plugin name (format: name$tag), if any, allows loading of same plugin multiple times
   //   * _err_ : Error; plugin load error, if any
   function use() {
-    var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
+    const args = Norma(
+      '{plugin:o|f|s, options:o|s|n|b?, callback:f?}',
+      arguments
+    )
     return use_plugin_desc(
       build_plugin_desc(args, useopts, eraro),
       useopts,
@@ -79,15 +84,18 @@ function make(useopts) {
     )
   }
 
-  use.Optioner = Optioner
-  use.Joi = Optioner.Joi
+  // use.Optioner = Optioner
+  // use.Joi = Optioner.Joi
 
   use.use_plugin_desc = function (plugin_desc) {
     return use_plugin_desc(plugin_desc, useopts, eraro)
   }
 
   use.build_plugin_desc = function () {
-    var args = Norma('{plugin:o|f|s, options:o|s|n|b?, callback:f?}', arguments)
+    const args = Norma(
+      '{plugin:o|f|s, options:o|s|n|b?, callback:f?}',
+      arguments
+    )
     return build_plugin_desc(args, useopts, eraro)
   }
 
@@ -109,27 +117,27 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
     load_plugin(plugin_desc, useopts.module, eraro)
   }
 
-  var defaults = null
+  let defaults = null
 
   // TODO: deprecate
-  var Joi = Optioner.Joi
+  // const Joi = Optioner.Joi
 
   if (
     plugin_desc.init &&
     plugin_desc.init.defaults &&
-    (Joi.isSchema(plugin_desc.init.defaults, { legacy: true }) ||
-      // TODO: use Gubu.isShape
-      (plugin_desc.init.defaults.gubu &&
-        plugin_desc.init.defaults.gubu.gubu$) ||
+    // (Joi.isSchema(plugin_desc.init.defaults, { legacy: true }) ||
+    // TODO: use Gubu.isShape
+    ((plugin_desc.init.defaults.gubu && plugin_desc.init.defaults.gubu.gubu$) ||
       'function' === typeof plugin_desc.init.defaults)
   ) {
     defaults = plugin_desc.init.defaults
   } else if (
-    plugin_desc.defaults &&
-    (Joi.isSchema(plugin_desc.defaults, { legacy: true }) ||
+    (plugin_desc.defaults &&
+      // (Joi.isSchema(plugin_desc.defaults, { legacy: true }) ||
       // TODO: use Gubu.isShape
-      (plugin_desc.defaults.gubu && plugin_desc.defaults.gubu.gubu$) ||
-      'function' === typeof plugin_desc.defaults)
+      plugin_desc.defaults.gubu &&
+      plugin_desc.defaults.gubu.gubu$) ||
+    'function' === typeof plugin_desc.defaults
   ) {
     defaults = plugin_desc.defaults
   } else {
@@ -143,30 +151,32 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
   plugin_desc.defaults = defaults
 
   if (useopts.merge_defaults && 'object' === typeof defaults) {
-    try {
-      plugin_desc.options = Optioner(defaults, { allow_unknown: true }).check(
-        plugin_desc.options
-      )
-    } catch (e) {
-      throw eraro('invalid_option', {
-        name: plugin_desc.name,
-        err_msg: e.message,
-        options: plugin_desc.options,
-      })
-    }
+    plugin_desc.options = DefaultsDeep({}, plugin_desc.options, defaults)
+
+    // try {
+    //   // plugin_desc.options = Optioner(defaults, { allow_unknown: true }).check(
+    //   //   plugin_desc.options
+    //   // )
+    // } catch (e) {
+    //   throw eraro('invalid_option', {
+    //     name: plugin_desc.name,
+    //     err_msg: e.message,
+    //     options: plugin_desc.options,
+    //   })
+    // }
   }
 
   // No init function found, require found nothing, so throw error.
   if ('function' !== typeof plugin_desc.init) {
-    var foldermap = {}
-    for (var i = 0; i < plugin_desc.history.length; i++) {
-      var item = plugin_desc.history[i]
-      var folder = Path.dirname(item.module)
+    const foldermap = {}
+    for (let i = 0; i < plugin_desc.history.length; i++) {
+      const item = plugin_desc.history[i]
+      const folder = Path.dirname(item.module)
       foldermap[folder] = foldermap[folder] || []
       foldermap[folder].push(item.path)
     }
 
-    var b = []
+    const b = []
     Object.keys(foldermap).forEach(function (folder) {
       b.push('[ ' + Path.resolve(folder) + ': ')
       foldermap[folder].forEach(function (path) {
@@ -185,10 +195,10 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
 // #### Create description object for the plugin
 function build_plugin_desc(spec, useopts, eraro) {
-  var plugin = spec.plugin
+  const plugin = spec.plugin
 
   // Don't do much with plugin options, just ensure they are an object.
-  var options =
+  let options =
     null == spec.options
       ? null == plugin.options
         ? {}
@@ -197,7 +207,7 @@ function build_plugin_desc(spec, useopts, eraro) {
   options = 'object' === typeof options ? options : { value$: options }
 
   // Start building the return value.
-  var plugin_desc = {
+  let plugin_desc = {
     options: options,
     callback: spec.callback,
     history: [],
@@ -218,7 +228,7 @@ function build_plugin_desc(spec, useopts, eraro) {
 
     // The function has no name, so generate a name for the plugin
     else {
-      var prefix = Array.isArray(useopts.prefix)
+      const prefix = Array.isArray(useopts.prefix)
         ? useopts.prefix[0]
         : useopts.prefix
       plugin_desc.name = prefix + Nid()
@@ -231,7 +241,7 @@ function build_plugin_desc(spec, useopts, eraro) {
   else if ('object' === typeof plugin) {
     plugin_desc = Object.assign({}, plugin, plugin_desc)
 
-    var name = plugin_desc.name
+    let name = plugin_desc.name
     if ('string' !== typeof name) {
       name = null != plugin_desc.init ? plugin_desc.init.name : null
     }
@@ -262,7 +272,7 @@ function build_plugin_desc(spec, useopts, eraro) {
   // The tag can be embedded inside the name using a $ separator: _name$tag_.
   // Note: the $tag suffix is NOT considered part of the file name!
 
-  var m = /^(.+)\$(.+)$/.exec(plugin_desc.name)
+  const m = /^(.+)\$(.+)$/.exec(plugin_desc.name)
   if (m) {
     plugin_desc.name = m[1]
     plugin_desc.tag = m[2]
@@ -293,11 +303,11 @@ function build_plugin_desc(spec, useopts, eraro) {
 //     6.   IF FOUND update plugin_desc, BREAK
 //     7.   IF NOT FOUND module = module.parent
 function load_plugin(plugin_desc, start_module, eraro) {
-  var current_module = start_module
-  var builtin = true
-  var level = 0
-  var reqfunc
-  var funcdesc = {}
+  let current_module = start_module
+  let builtin = true
+  let level = 0
+  let funcdesc = {}
+  let reqfunc
 
   // Each loop ascends the module.parent hierarchy
   while (
@@ -381,7 +391,7 @@ function handle_load_error(err, found, plugin_desc, eraro) {
 function make_reqfunc(module) {
   if (null == module) return null
 
-  var reqfunc = module.require.bind(module)
+  const reqfunc = module.require.bind(module)
   reqfunc.module = module.id
 
   return reqfunc
@@ -389,10 +399,11 @@ function make_reqfunc(module) {
 
 // #### Iterate over all the search items using the provided require function
 function perform_require(reqfunc, plugin_desc, builtin, level) {
-  var search_list = plugin_desc.search
-  var initfunc, search
+  const search_list = plugin_desc.search
+  let initfunc
+  let search
 
-  next_search_entry: for (var i = 0; i < search_list.length; i++) {
+  next_search_entry: for (let i = 0; i < search_list.length; i++) {
     search = search_list[i]
 
     // only load builtins if builtin flag true
@@ -407,7 +418,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
         search.path = reqfunc.resolve(search.name)
       }
 
-      var history_entry = {
+      const history_entry = {
         module: reqfunc.module,
         path: search.path,
         name: search.name,
@@ -451,25 +462,28 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 // #### Create the list of require search locations
 // Searches are performed without the prefix first
 function build_plugin_names() {
-  var args = Norma('{name:s, builtin:s|a?, prefix:s|a?, system:a?}', arguments)
+  const args = Norma(
+    '{name:s, builtin:s|a?, prefix:s|a?, system:a?}',
+    arguments
+  )
 
-  var name = args.name
+  const name = args.name
 
-  var builtin_list = args.builtin
+  const builtin_list = args.builtin
     ? Array.isArray(args.builtin)
       ? args.builtin
       : [args.builtin]
     : []
 
-  var prefix_list = args.prefix
+  const prefix_list = args.prefix
     ? Array.isArray(args.prefix)
       ? args.prefix
       : [args.prefix]
     : []
 
-  var system_modules = args.system || []
+  const system_modules = args.system || []
 
-  var plugin_names = []
+  const plugin_names = []
 
   // Do the builtins first! But only for the framework module, see above.
   if (!name.match(/^[./]/)) {
