@@ -85,7 +85,7 @@ describe('use', function () {
       },
       function () {
         return 'f1tck'
-      }
+      },
     )
     Assert.equal('f1', f1tc.name)
     Assert.equal('t0', f1tc.tag)
@@ -117,7 +117,7 @@ describe('use', function () {
       },
       function () {
         return 'f3tck'
-      }
+      },
     )
     Assert.equal('f3', f3tc.name)
     Assert.equal('t1', f3tc.tag)
@@ -144,8 +144,8 @@ describe('use', function () {
     } catch (e) {
       Assert.equal('no_name', e.code)
       Assert.equal(
-        'use-plugin: No name property found for plugin defined by Object { foo: 1 }.',
-        e.message
+        'use-plugin: No name property found for plugin defined by Object {foo:1}.',
+        e.message,
       )
     }
 
@@ -155,8 +155,8 @@ describe('use', function () {
     } catch (e) {
       Assert.equal('no_init_function', e.code)
       Assert.equal(
-        "use-plugin: The init property is not a function for plugin a defined by Object { name: 'a', init: 1 }.",
-        e.message
+        'use-plugin: The init property is not a function for plugin a defined by Object {name:a,init:1}.',
+        e.message,
       )
     }
 
@@ -238,7 +238,7 @@ describe('use', function () {
           f: { g: 4 },
         },
       },
-      { c: false, f: { h: 5 } }
+      { c: false, f: { h: 5 } },
     )
 
     expect(p2.name).equal('p2n')
@@ -406,7 +406,7 @@ function make_it(lab) {
       opts,
       Util.promisify(function (x, fin) {
         func(fin)
-      })
+      }),
     )
   }
 }

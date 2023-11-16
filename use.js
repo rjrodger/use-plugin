@@ -39,7 +39,7 @@ function make(useopts) {
       merge_defaults: true,
       gubu: true,
     },
-    useopts
+    useopts,
   )
 
   // Setup error messages, see msgmap function below for text.
@@ -75,12 +75,12 @@ function make(useopts) {
   function use() {
     const args = Norma(
       '{plugin:o|f|s, options:o|s|n|b?, callback:f?}',
-      arguments
+      arguments,
     )
     return use_plugin_desc(
       build_plugin_desc(args, useopts, eraro),
       useopts,
-      eraro
+      eraro,
     )
   }
 
@@ -94,7 +94,7 @@ function make(useopts) {
   use.build_plugin_desc = function () {
     const args = Norma(
       '{plugin:o|f|s, options:o|s|n|b?, callback:f?}',
-      arguments
+      arguments,
     )
     return build_plugin_desc(args, useopts, eraro)
   }
@@ -107,7 +107,7 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
     plugin_desc.name,
     useopts.builtin,
     useopts.prefix,
-    useopts.system_modules
+    useopts.system_modules,
   )
 
   // The init function may already be defined.
@@ -144,7 +144,7 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
     defaults = Object.assign(
       {},
       plugin_desc.defaults,
-      plugin_desc.init && plugin_desc.init.defaults
+      plugin_desc.init && plugin_desc.init.defaults,
     )
   }
 
@@ -265,7 +265,7 @@ function build_plugin_desc(spec, useopts, eraro) {
   plugin_desc.options = Object.assign(
     {},
     plugin_desc.options || {},
-    options || {}
+    options || {},
   )
 
   // Plugins can be tagged.
@@ -321,7 +321,7 @@ function load_plugin(plugin_desc, start_module, eraro) {
         funcdesc.error,
         funcdesc.found,
         plugin_desc,
-        eraro
+        eraro,
       )
     }
 
@@ -464,7 +464,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 function build_plugin_names() {
   const args = Norma(
     '{name:s, builtin:s|a?, prefix:s|a?, system:a?}',
-    arguments
+    arguments,
   )
 
   const name = args.name
