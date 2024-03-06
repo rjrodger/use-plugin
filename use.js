@@ -119,7 +119,6 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   let defaults = null
 
-
   if (
     plugin_desc.init &&
     plugin_desc.init.defaults &&
@@ -166,7 +165,7 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   // No init function found, require found nothing, so throw error.
   if ('function' !== typeof plugin_desc.init) {
-    if(null == plugin_desc.found) {
+    if (null == plugin_desc.found) {
       const foldermap = {}
 
       for (let i = 0; i < plugin_desc.history.length; i++) {
@@ -175,21 +174,20 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
         foldermap[folder] = foldermap[folder] || []
         foldermap[folder].push(item.path)
       }
-      
+
       const b = []
       Object.keys(foldermap).forEach(function (folder) {
         b.push('\n' + Path.resolve(folder) + ':')
         foldermap[folder].forEach(function (path) {
-          b.push('\n  '+path)
+          b.push('\n  ' + path)
         })
         b.push('\n')
       })
-      
+
       plugin_desc.searchlist = b.join('')
-      
+
       throw eraro('not_found', plugin_desc)
-    }
-    else {
+    } else {
       throw eraro('invalid_definition', plugin_desc)
     }
   }
@@ -341,14 +339,14 @@ function load_plugin(plugin_desc, start_module, eraro) {
   plugin_desc.found = funcdesc.found
 
   // Handle TypeScript default export shenanigans
-  if(null != funcdesc.initfunc &&
-     'object' === typeof funcdesc.initfunc &&
-     'function' === typeof funcdesc.initfunc.default)
-  {
+  if (
+    null != funcdesc.initfunc &&
+    'object' === typeof funcdesc.initfunc &&
+    'function' === typeof funcdesc.initfunc.default
+  ) {
     funcdesc.initfunc = funcdesc.initfunc.default
   }
 
-  
   // The function name of the initfunc, if defined,
   // sets the final name of the plugin.
   // This replaces relative path references (like "../myplugins/foo")
@@ -415,8 +413,8 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
   const search_list = plugin_desc.search
   let initfunc
   let search
-  let found 
-  
+  let found
+
   next_search_entry: for (let i = 0; i < search_list.length; i++) {
     search = search_list[i]
 
@@ -430,8 +428,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
       // NOTE: Unfortunately module.require does not expose require.resolve
       if (reqfunc.resolve) {
         search.path = reqfunc.resolve(search.name)
-      }
-      else {
+      } else {
         search.path = search.path || search.name
       }
 
@@ -445,11 +442,10 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
       initfunc = reqfunc(search.name)
 
       found = search
-      
+
       // Found it!
       break
-    }
-    catch (e) {
+    } catch (e) {
       if ('MODULE_NOT_FOUND' == e.code) {
         // TODO: this fails if a sub file of the plugin module fails,
         // as the module name is within the file path
@@ -462,9 +458,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 
         // Plain old not found, so continue searching.
         continue next_search_entry
-      }
-      else {
-
+      } else {
         // The require failed for some other reason.
         return { error: e, found: search }
       }
@@ -492,7 +486,7 @@ function build_plugin_names() {
 
   const name = args.name
   const isRelative = name.match(/^[./]/)
-  
+
   const builtin_list = args.builtin
     ? Array.isArray(args.builtin)
       ? args.builtin
@@ -518,14 +512,14 @@ function build_plugin_names() {
       })
     })
 
-  // Try the prefix first - this ensures something like seneca-joi works
-  // where there is also a joi module
+    // Try the prefix first - this ensures something like seneca-joi works
+    // where there is also a joi module
 
     prefix_list.forEach(function (prefix) {
       plugin_names.push({ type: 'normal', name: prefix + name })
     })
   }
-  
+
   // Vanilla require on the plugin name.
   // Common case: the require succeeds on first module parent,
   // because the plugin is an npm module
@@ -535,7 +529,7 @@ function build_plugin_names() {
     plugin_names.push({ type: 'normal', name: name })
   }
 
-  if(!isRelative) {
+  if (!isRelative) {
     // OK, probably not an npm module, try locally.
     plugin_names.push({ type: 'normal', name: './' + name })
 
@@ -562,9 +556,8 @@ function msgmap() {
     load_failed:
       'Could not load plugin <%=name%> defined in <%=found_name%> due to error: <%=err_msg%>.',
     invalid_option:
-    'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>',
-    invalid_definition:
-      'Plugin <%=name%>: no definition function found.',
+      'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>',
+    invalid_definition: 'Plugin <%=name%>: no definition function found.',
   }
 }
 
