@@ -119,8 +119,6 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   let defaults = null
 
-  // TODO: deprecate
-  // const Joi = Optioner.Joi
 
   if (
     plugin_desc.init &&
@@ -168,26 +166,32 @@ function use_plugin_desc(plugin_desc, useopts, eraro) {
 
   // No init function found, require found nothing, so throw error.
   if ('function' !== typeof plugin_desc.init) {
-    const foldermap = {}
-    for (let i = 0; i < plugin_desc.history.length; i++) {
-      const item = plugin_desc.history[i]
-      const folder = Path.dirname(item.module)
-      foldermap[folder] = foldermap[folder] || []
-      foldermap[folder].push(item.path)
-    }
+    if(null == plugin_desc.found) {
+      const foldermap = {}
 
-    const b = []
-    Object.keys(foldermap).forEach(function (folder) {
-      b.push('[ ' + Path.resolve(folder) + ': ')
-      foldermap[folder].forEach(function (path) {
-        b.push(path + ', ')
+      for (let i = 0; i < plugin_desc.history.length; i++) {
+        const item = plugin_desc.history[i]
+        const folder = Path.dirname(item.module)
+        foldermap[folder] = foldermap[folder] || []
+        foldermap[folder].push(item.path)
+      }
+      
+      const b = []
+      Object.keys(foldermap).forEach(function (folder) {
+        b.push('\n' + Path.resolve(folder) + ':')
+        foldermap[folder].forEach(function (path) {
+          b.push('\n  '+path)
+        })
+        b.push('\n')
       })
-      b.push(' ] ')
-    })
-
-    plugin_desc.searchlist = b.join('')
-
-    throw eraro('not_found', plugin_desc)
+      
+      plugin_desc.searchlist = b.join('')
+      
+      throw eraro('not_found', plugin_desc)
+    }
+    else {
+      throw eraro('invalid_definition', plugin_desc)
+    }
   }
 
   return plugin_desc
@@ -336,6 +340,15 @@ function load_plugin(plugin_desc, start_module, eraro) {
   plugin_desc.requirepath = funcdesc.require
   plugin_desc.found = funcdesc.found
 
+  // Handle TypeScript default export shenanigans
+  if(null != funcdesc.initfunc &&
+     'object' === typeof funcdesc.initfunc &&
+     'function' === typeof funcdesc.initfunc.default)
+  {
+    funcdesc.initfunc = funcdesc.initfunc.default
+  }
+
+  
   // The function name of the initfunc, if defined,
   // sets the final name of the plugin.
   // This replaces relative path references (like "../myplugins/foo")
@@ -402,7 +415,8 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
   const search_list = plugin_desc.search
   let initfunc
   let search
-
+  let found 
+  
   next_search_entry: for (let i = 0; i < search_list.length; i++) {
     search = search_list[i]
 
@@ -417,6 +431,9 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
       if (reqfunc.resolve) {
         search.path = reqfunc.resolve(search.name)
       }
+      else {
+        search.path = search.path || search.name
+      }
 
       const history_entry = {
         module: reqfunc.module,
@@ -427,9 +444,12 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 
       initfunc = reqfunc(search.name)
 
+      found = search
+      
       // Found it!
       break
-    } catch (e) {
+    }
+    catch (e) {
       if ('MODULE_NOT_FOUND' == e.code) {
         // TODO: this fails if a sub file of the plugin module fails,
         // as the module name is within the file path
@@ -442,7 +462,9 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 
         // Plain old not found, so continue searching.
         continue next_search_entry
-      } else {
+      }
+      else {
+
         // The require failed for some other reason.
         return { error: e, found: search }
       }
@@ -455,7 +477,8 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
     module: reqfunc.module,
     require: search.name,
     path: search.path,
-    found: search,
+    // found: search,
+    found,
   }
 }
 
@@ -468,7 +491,8 @@ function build_plugin_names() {
   )
 
   const name = args.name
-
+  const isRelative = name.match(/^[./]/)
+  
   const builtin_list = args.builtin
     ? Array.isArray(args.builtin)
       ? args.builtin
@@ -486,21 +510,22 @@ function build_plugin_names() {
   const plugin_names = []
 
   // Do the builtins first! But only for the framework module, see above.
-  if (!name.match(/^[./]/)) {
+  if (!isRelative) {
     builtin_list.forEach(function (builtin) {
       plugin_names.push({ type: 'builtin', name: builtin + name })
       prefix_list.forEach(function (prefix) {
         plugin_names.push({ type: 'builtin', name: builtin + prefix + name })
       })
     })
-  }
 
   // Try the prefix first - this ensures something like seneca-joi works
   // where there is also a joi module
-  prefix_list.forEach(function (prefix) {
-    plugin_names.push({ type: 'normal', name: prefix + name })
-  })
 
+    prefix_list.forEach(function (prefix) {
+      plugin_names.push({ type: 'normal', name: prefix + name })
+    })
+  }
+  
   // Vanilla require on the plugin name.
   // Common case: the require succeeds on first module parent,
   // because the plugin is an npm module
@@ -510,12 +535,14 @@ function build_plugin_names() {
     plugin_names.push({ type: 'normal', name: name })
   }
 
-  // OK, probably not an npm module, try locally.
-  plugin_names.push({ type: 'normal', name: './' + name })
+  if(!isRelative) {
+    // OK, probably not an npm module, try locally.
+    plugin_names.push({ type: 'normal', name: './' + name })
 
-  prefix_list.forEach(function (prefix) {
-    plugin_names.push({ type: 'normal', name: './' + prefix + name })
-  })
+    prefix_list.forEach(function (prefix) {
+      plugin_names.push({ type: 'normal', name: './' + prefix + name })
+    })
+  }
 
   return plugin_names
 }
@@ -535,7 +562,9 @@ function msgmap() {
     load_failed:
       'Could not load plugin <%=name%> defined in <%=found_name%> due to error: <%=err_msg%>.',
     invalid_option:
-      'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>',
+    'Plugin <%=name%>: option value is not valid: <%=err_msg%> in options <%=options%>',
+    invalid_definition:
+      'Plugin <%=name%>: no definition function found.',
   }
 }
 
