@@ -102,6 +102,7 @@ function make(useopts) {
   return use
 }
 
+
 function use_plugin_desc(plugin_desc, useopts, eraro) {
   plugin_desc.search = build_plugin_names(
     plugin_desc.name,
@@ -476,6 +477,7 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
   }
 }
 
+
 // #### Create the list of require search locations
 // Searches are performed without the prefix first
 function build_plugin_names() {
@@ -538,8 +540,33 @@ function build_plugin_names() {
     })
   }
 
+
+  const orig_plugin_names = plugin_names.slice(0)
+  orig_plugin_names.forEach((n)=>{
+    if(n.name.match(/[a-z][A-Z]/)) {
+      plugin_names.push({
+        ...n,
+        name: n.name
+          .replace(/([a-z])([A-Z])/g,(m,p1,p2)=>p1+'-'+p2.toLowerCase())
+          .replace(/([A-Z])/g,(m,p1)=>p1.toLowerCase())
+      })
+    }
+    else if(n.name.match(/[a-z]-[a-z]/)) {
+      plugin_names.push({
+        ...n,
+        name: n.name
+          .replace(/([a-z])-([a-z])/g,(m,p1,p2)=>p1+p2.toUpperCase())
+          .replace(/([^\w])([a-z])/g,(m,p1,p2)=>p1+p2.toUpperCase())
+          .replace(/^([a-z])/g,(m,p1)=>p1.toUpperCase())
+      })
+    }
+  })
+  
+  // console.log('PLUGIN_NAMES', plugin_names)
+  
   return plugin_names
 }
+
 
 // #### Define the error messages for this module
 function msgmap() {

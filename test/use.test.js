@@ -26,6 +26,20 @@ describe('use', function () {
     fin()
   })
 
+
+  it('camel', function (fin) {
+    const CamelFirst = Origin.use('CamelFirst')
+    Assert.equal('CamelFirst', CamelFirst.name)
+    Assert.equal('CamelFirst', CamelFirst.init())
+
+    const CamelSecond = Origin.use('camel-second')
+    Assert.equal('CamelSecond', CamelSecond.name)
+    Assert.equal('CamelSecond', CamelSecond.init())
+
+    fin()
+  })
+
+
   // Ensures Seneca.use('repl') works for seneca-repl
   it('prefix-repl', function (fin) {
     var usep = Origin.makeuse({ prefix: 'p-' })
