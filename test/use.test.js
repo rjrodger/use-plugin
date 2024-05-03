@@ -26,7 +26,6 @@ describe('use', function () {
     fin()
   })
 
-
   it('camel', function (fin) {
     const CamelFirst = Origin.use('CamelFirst')
     Assert.equal('CamelFirst', CamelFirst.name)
@@ -38,7 +37,6 @@ describe('use', function () {
 
     fin()
   })
-
 
   // Ensures Seneca.use('repl') works for seneca-repl
   it('prefix-repl', function (fin) {
