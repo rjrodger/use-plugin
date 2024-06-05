@@ -1,4 +1,4 @@
-/* Copyright © 2014-2022 Richard Rodger and other contributors, MIT License. */
+/* Copyright © 2014-2024 Richard Rodger and other contributors, MIT License. */
 'use strict'
 
 const Path = require('path')
@@ -8,11 +8,21 @@ const Module = require('module')
 
 // #### External modules
 const Nid = require('nid')
-const Norma = require('norma')
+const Gubu = require('gubu')
 const Eraro = require('eraro')
 const DefaultsDeep = require('lodash.defaultsdeep')
 
-// const Optioner = require('optioner')
+const { MakeArgu, Skip, One } = Gubu
+
+const Argu = MakeArgu('use')
+
+// '{plugin:o|f|s, options:o|s|n|b?, callback:f?}',
+
+const PluginArgu = Argu('plugin', {
+  plugin: One(Object, Function, String),
+  options: Skip(One(Object, String)),
+  callback: Skip(One(Function, null)),
+})
 
 // #### Exports
 module.exports = make
@@ -73,15 +83,20 @@ function make(useopts) {
   //   * _tag_ : String; the tag value of the plugin name (format: name$tag), if any, allows loading of same plugin multiple times
   //   * _err_ : Error; plugin load error, if any
   function use() {
-    const args = Norma(
-      '{plugin:o|f|s, options:o|s|n|b?, callback:f?}',
-      arguments,
-    )
-    return use_plugin_desc(
-      build_plugin_desc(args, useopts, eraro),
-      useopts,
-      eraro,
-    )
+    try {
+      const args = PluginArgu(arguments)
+
+      return use_plugin_desc(
+        build_plugin_desc(args, useopts, eraro),
+        useopts,
+        eraro,
+      )
+    } catch (err) {
+      if ('shape' === err.code) {
+        err.code = 'invalid_arguments'
+      }
+      throw err
+    }
   }
 
   // use.Optioner = Optioner
@@ -92,11 +107,15 @@ function make(useopts) {
   }
 
   use.build_plugin_desc = function () {
-    const args = Norma(
-      '{plugin:o|f|s, options:o|s|n|b?, callback:f?}',
-      arguments,
-    )
-    return build_plugin_desc(args, useopts, eraro)
+    try {
+      const args = PluginArgu(arguments)
+      return build_plugin_desc(args, useopts, eraro)
+    } catch (err) {
+      if ('shape' === err.code) {
+        err.code = 'invalid_arguments'
+      }
+      throw err
+    }
   }
 
   return use
@@ -476,13 +495,17 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
   }
 }
 
+const BuildNameArgu = Argu('build-name', {
+  name: String,
+  builtin: Skip(One(String, Array)),
+  prefix: Skip(One(String, Array)),
+  system: Skip(Array),
+})
+
 // #### Create the list of require search locations
 // Searches are performed without the prefix first
 function build_plugin_names() {
-  const args = Norma(
-    '{name:s, builtin:s|a?, prefix:s|a?, system:a?}',
-    arguments,
-  )
+  const args = BuildNameArgu(arguments)
 
   const name = args.name
   const isRelative = name.match(/^[./]/)

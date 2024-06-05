@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "12.0.1",
+  "version": "13.0.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
@@ -28,15 +28,14 @@
   "dependencies": {
     "eraro": "^3.0.1",
     "nid": "^2.0.1",
-    "norma": "^3.1.1",
+    "gubu": "^7.1.0",
     "lodash.defaultsdeep": "^4.6.1"
   },
   "devDependencies": {
-    "gubu": "^7.0.0",
     "@hapi/code": "^9.0.3",
     "@hapi/lab": "^25.2.0",
     "coveralls": "^3.1.1",
-    "prettier": "^3.2.5"
+    "prettier": "^3.3.1"
   },
   "files": [
     "README.md",

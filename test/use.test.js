@@ -346,12 +346,12 @@ describe('use', function () {
   })
 
   it('frozen-options', function (fin) {
-    var f1 = Origin.use(function f1() {}, Object.freeze({ a: 1 }))
+    const f1 = Origin.use(function f1() {}, Object.freeze({ a: 1 }))
     Assert.equal(f1.options.a, 1)
     fin()
   })
 
-  it('edges', function (fin) {
+  it('edges-other', function (fin) {
     try {
       Origin.use()
       Code.fail()
