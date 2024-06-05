@@ -12,7 +12,7 @@ const Gubu = require('gubu')
 const Eraro = require('eraro')
 const DefaultsDeep = require('lodash.defaultsdeep')
 
-const { MakeArgu, Skip, One } = Gubu
+const { MakeArgu, Skip, One, Empty } = Gubu
 
 const Argu = MakeArgu('use')
 
@@ -497,8 +497,8 @@ function perform_require(reqfunc, plugin_desc, builtin, level) {
 
 const BuildNameArgu = Argu('build-name', {
   name: String,
-  builtin: Skip(One(String, Array)),
-  prefix: Skip(One(String, Array)),
+  builtin: Skip(One(Empty(String), Array)),
+  prefix: Skip(One(Empty(String), Array)),
   system: Skip(Array),
 })
 

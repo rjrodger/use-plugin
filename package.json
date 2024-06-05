@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "13.0.0",
+  "version": "13.0.1",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
