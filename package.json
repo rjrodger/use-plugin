@@ -1,6 +1,6 @@
 {
   "name": "use-plugin",
-  "version": "13.1.0",
+  "version": "13.2.0",
   "description": "Generic plugin loader functionality for Node.js frameworks.",
   "main": "use.js",
   "scripts": {
@@ -28,7 +28,7 @@
   "dependencies": {
     "eraro": "^3.0.1",
     "nid": "^2.0.1",
-    "gubu": "^8.1.0",
+    "gubu": "^8.2.1",
     "lodash.defaultsdeep": "^4.6.1"
   },
   "devDependencies": {
